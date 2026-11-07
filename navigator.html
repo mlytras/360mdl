@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>360° MDL Navigator — install and start</title>
+<meta name="description" content="Install the 360° MDL Navigator, the Claude Skill that runs the 360° MDL literature review method under the Two-Key Rule, and start your review in ten minutes.">
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+:root{
+  --bg:#F5F7F9;--surface:#fff;--fg:#17202E;--muted:#5E6B7C;--line:#D9DFE6;
+  --navy:#14213D;--teal:#0F7C8C;--teal-soft:#E2F1F3;--amber:#E09F3E;--coral:#C8553D;--green:#2A9D8F;--purple:#7B3F99;--blue:#1F4E79;
+  --sans:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace;--serif:'Lora',Georgia,serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:16px;line-height:1.55}
+a{color:var(--teal)}
+h1,h2,h3{margin:0;line-height:1.2;text-wrap:balance}
+h2{font-size:1.7rem;font-weight:700;color:var(--navy);margin-bottom:.4rem}
+h3{font-size:1.05rem;font-weight:700}
+.eyebrow{font-size:.74rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:.6rem}
+.muted{color:var(--muted)}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+section{padding:64px 0}
+section+section{border-top:1px solid var(--line)}
+/* nav */
+nav{position:sticky;top:0;z-index:10;background:rgba(20,33,61,.96);backdrop-filter:blur(6px);color:#fff}
+nav .wrap{display:flex;align-items:center;gap:18px;height:58px}
+nav img{height:34px;width:34px;border-radius:50%}
+nav .name{font-weight:700;letter-spacing:.02em;margin-right:auto}
+nav a{color:#CFD8E3;text-decoration:none;font-size:.9rem;font-weight:500}
+nav a:hover{color:#fff}
+nav .links{display:flex;gap:18px}
+nav a.cta{background:var(--teal);color:#fff;padding:7px 14px;border-radius:8px}
+@media(max-width:760px){nav .links{display:none}}
+/* hero */
+.hero{background:var(--navy);color:#fff;padding:72px 0 64px}
+.hero .wrap{display:grid;grid-template-columns:1.3fr 1fr;gap:40px;align-items:center}
+@media(max-width:860px){.hero .wrap{grid-template-columns:1fr}}
+.hero h1{font-size:clamp(2rem,6vw,2.9rem);font-weight:800;letter-spacing:-.02em}
+.hero h1 span{color:#5CC3D0}
+.hero .tag{font-family:var(--serif);font-size:1.25rem;color:#CFD8E3;margin:18px 0 26px;max-width:560px}
+.btns{display:flex;flex-wrap:wrap;gap:10px}
+.btn{display:inline-block;font-weight:600;font-size:.95rem;padding:11px 18px;border-radius:9px;text-decoration:none;border:1px solid transparent}
+.btn.primary{background:var(--teal);color:#fff}
+.btn.ghost{border-color:rgba(255,255,255,.4);color:#fff}
+.btn.light{border-color:var(--line);background:#fff;color:var(--navy)}
+.hero img.logo{width:min(300px,70%);margin:0 auto;display:block;border-radius:50%;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.facts{display:flex;flex-wrap:wrap;gap:28px;margin-top:30px}
+.fact b{display:block;font-size:1.7rem;font-family:var(--mono);color:#5CC3D0;line-height:1.1}
+.fact span{font-size:.82rem;color:#CFD8E3}
+/* grids */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-top:26px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px 24px;display:flex;flex-direction:column;gap:10px}
+.card.top{border-top:4px solid var(--teal)}
+.card .who{font-size:.74rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.card p{margin:0;font-size:.95rem}
+.card .btns{margin-top:auto;padding-top:8px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;margin-top:26px}
+@media(max-width:860px){.two{grid-template-columns:1fr}}
+.two img{width:100%;border:1px solid var(--line);border-radius:10px;background:#fff}
+.streams{display:grid;gap:8px;margin-top:16px}
+.stream{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:center;font-size:.95rem}
+.stream i{display:block;height:34px;border-radius:7px;color:#fff;font-style:normal;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:.85rem}
+.f1{background:var(--blue)}.f2{background:var(--purple)}.f3{background:var(--amber)}.f4{background:var(--green)}.f5{background:var(--coral)}
+ul.plain{padding-left:18px;margin:10px 0}
+ul.plain li{margin:4px 0;font-size:.95rem}
+table{width:100%;border-collapse:collapse;font-size:.92rem;margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th{text-align:left;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 14px;border-bottom:1px solid var(--line);background:#FAFBFC}
+td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.mono,th.mono{font-family:var(--mono);white-space:nowrap}
+.tscroll{overflow-x:auto}
+.cite{background:var(--navy);color:#fff;border-radius:12px;padding:26px 28px;margin-top:22px}
+.cite p{font-family:var(--serif);margin:8px 0;font-size:1rem}
+.cite a{color:#5CC3D0;word-break:break-all}
+.cite .k{font-size:.74rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#8FD3DC}
+.box{background:var(--teal-soft);border-left:4px solid var(--teal);border-radius:8px;padding:16px 20px;margin-top:18px}
+.box p{margin:6px 0}
+.keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:18px}
+.key{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px 18px;font-size:.92rem}
+.key b{display:block;color:var(--navy);margin-bottom:4px}
+footer{background:var(--navy);color:#CFD8E3;padding:40px 0;font-size:.88rem}
+footer .wrap{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+@media(max-width:760px){footer .wrap{grid-template-columns:1fr}}
+footer a{color:#8FD3DC}
+footer b{color:#fff}
+.small{font-size:.85rem;color:var(--muted)}
+</style>
+<style>
+.step{display:grid;grid-template-columns:44px 1fr;gap:16px;margin:18px 0}
+.step .n{width:40px;height:40px;border-radius:50%;background:var(--navy);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:1.05rem}
+.step h3{margin:6px 0 6px}
+.prompt{font-family:var(--mono);font-size:.86rem;background:#0F1623;color:#CFE8EC;border-radius:10px;padding:14px 16px;white-space:pre-wrap;margin:10px 0}
+.files code{display:inline-block;font-family:var(--mono);font-size:.78rem;border:1px solid var(--line);border-radius:6px;padding:2px 8px;margin:3px 4px 3px 0;background:#fff}
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+  <img src="assets/logo.png" alt=""><span class="name">360° MDL</span>
+  <span class="links">
+    <a href="index.html#method">The method</a><a href="index.html#start">Start here</a><a href="index.html#navigator">Navigator</a><a href="index.html#calculator">Calculator</a><a href="index.html#indices">Indices</a><a href="index.html#ai">Responsible AI</a><a href="index.html#resources">Resources</a><a href="index.html#cite">Cite</a>
+  </span>
+  <a class="cta" href="calculator.html">Open the calculator</a>
+</div></nav>
+<header class="hero"><div class="wrap">
+  <div>
+    <div class="eyebrow" style="color:#8FD3DC">AI agent · Claude Skill · v0.1.1 beta · MIT / CC BY 4.0</div>
+    <h1>360° MDL <span>Navigator</span></h1>
+    <p class="tag">The agent that runs the 360° MDL method with you: from a topic sentence to a verified Core Knowledge and a Knowledge Distillate, under the Two-Key Rule. You keep every decision; it does the work and keeps the record.</p>
+    <div class="btns">
+      <a class="btn primary" href="360mdl-navigator.zip">Download the skill (zip, 340 KB)</a>
+      <a class="btn ghost" href="https://github.com/mlytras/360mdl">Source on GitHub</a>
+      <a class="btn ghost" href="https://doi.org/10.5281/zenodo.24041176">Zenodo record</a>
+    </div>
+  </div>
+  <img class="logo" src="assets/logo.png" alt="360° MDL logo">
+</div></header>
+
+<section><div class="wrap">
+  <div class="eyebrow">Install and start</div>
+  <h2>Ten minutes to your first Core Knowledge</h2>
+  <div class="step"><div class="n">1</div><div><h3>Install the skill</h3><p>In claude.ai (web or desktop): profile menu → <b>Settings → Customize → Skills → Upload skill</b> → choose <code>360mdl-navigator.zip</code> as it is, without unzipping. It appears as <i>360mdl-navigator</i>; keep it enabled. In Claude Code, unzip it into <code>.claude/skills/</code>.</p></div></div>
+  <div class="step"><div class="n">2</div><div><h3>Prepare your topic and, if you have them, your exports</h3><p>One sentence for the topic and the tier (Lite for a short chapter, Standard for a thesis chapter or a journal review, Advanced for a flagship review). If you already ran searches, export them: Scopus → CSV with abstracts, Web of Science → tab-delimited, Zotero or EndNote → RIS or BibTeX. Starting from scratch is fine too.</p></div></div>
+  <div class="step"><div class="n">3</div><div><h3>Start the conversation</h3><p>Open a new conversation (ideally inside a Project for your review), attach the exports, and write:</p>
+  <div class="prompt">Use the 360mdl-navigator skill. Start a 360° MDL review on "&lt;your topic&gt;", Standard tier.
+I have a Scopus export attached (stream SCO, slice IMP). Help me discover the other streams.</div>
+  <p class="small">From scratch: <i>Use the 360mdl-navigator skill. Start a 360° MDL review on "&lt;your topic&gt;", Standard tier, from scratch.</i></p></div></div>
+  <div class="step"><div class="n">4</div><div><h3>Turn the four keys</h3><p>The Navigator stops and waits for you four times: <b>Key 1</b> the Review Canvas · <b>Key 2</b> the 6R scores and the core corpus (PASS and RESERVE items one by one, clear excludes in a batch after a 10 % sample) · <b>Key 3</b> the key findings · <b>Key 4</b> the Knowledge Distillate, dimension by dimension. Answer in plain words: "confirm", "R6 should be 2 because…", "merge dimensions 2 and 5". Nothing is final until you say so.</p></div></div>
+  <div class="step"><div class="n">5</div><div><h3>Take your Core Knowledge, then iterate</h3><p>Every build gives you a folder:</p>
+  <p class="files"><code>360MDL_Toolkit_v2026_&lt;topic&gt;_v1.xlsx</code><code>calculator.json</code><code>gaps_report.md</code><code>methods_draft.md</code><code>ai_use_statement.md</code><code>mdlrc_checklist.md</code><code>navigator_run_checklist.md</code><code>distillate/ (Markdown + Word, APA or Harvard)</code><code>audit_log.jsonl</code><code>review_state_v1.json</code></p>
+  <p>Open <code>calculator.json</code> or the toolkit in the <a href="calculator.html">Index Calculator</a> for the figures. Read the gaps report with your supervisor, add exports or DOIs, and build again: each version shows the indices before and after.</p></div></div>
+</div></section>
+
+<section style="background:#fff"><div class="wrap">
+  <div class="eyebrow">What it will and will not do</div>
+  <h2>The rules the Navigator cannot break</h2>
+  <div class="keys">
+    <div class="key"><b>No record without an identifier</b>Every item comes from an API response, an uploaded export or an opened page, with a DOI, PubMed ID, OpenAlex ID or URL. It never writes a reference from memory.</div>
+    <div class="key"><b>Proposed until you confirm</b>Scores, selections, findings and the Distillate stay "proposed" until you turn the key; the confirmation and any change you make are logged with your name.</div>
+    <div class="key"><b>Honest gaps</b>Every build ends with a gaps report: sources it could not reach, indices below target, keys not yet turned, what to do next.</div>
+    <div class="key"><b>The toolkit is the contract</b>It fills the official 360° MDL toolkit (T1–T17) and uses the method's indices and checklist; it does not invent formats of its own.</div>
+  </div>
+  <p class="small" style="margin-top:16px">Closed databases (Google Scholar, Scopus, Web of Science) are not queried by the agent: it gives you the exact strings and import instructions. Open APIs (OpenAlex, Crossref, PubMed, arXiv) are used where your environment allows; otherwise the Navigator says so and uses web search with opened pages.</p>
+</div></section>
+
+<section><div class="wrap">
+  <div class="eyebrow">Worked example</div>
+  <h2>It reproduces a published review exactly</h2>
+  <p style="max-width:760px">The skill ships with the author's review <i>Energy transition for smart cities in the Arab world</i> (94 records, 56 core items, 15 key findings). Replayed through the Navigator, the indices come out identical to the published ones: SBI 0.92 · CovI 1.00 · MDI 0.86 · RI 0.90 · LOSO 0.80 · Convergence 5 %. The example also includes the Knowledge Distillate drafted by the Navigator for that review.</p>
+  <div class="btns"><a class="btn light" href="https://doi.org/10.5281/zenodo.23772941">Open data of the review</a><a class="btn light" href="360MDL_Index_Calculator_User_Guide.pdf#page=11">The Claude protocol (User Guide, Ch. 6)</a></div>
+</div></section>
+
+<section id="cite" style="background:#fff"><div class="wrap">
+  <div class="eyebrow">Citation and licence</div>
+  <h2>How to cite the Navigator</h2>
+  <div class="cite">
+    <p>Lytras, M. D. (2026). <i>360° MDL Navigator</i> (Version 0.1.1) [Software]. Zenodo. <a href="https://doi.org/10.5281/zenodo.24041176">https://doi.org/10.5281/zenodo.24041176</a></p>
+    <p>Lytras, M. D. (2026). <i>360° MDL: The Multidimensional Literature Review Model — Version 2026</i>. Zenodo. <a href="https://doi.org/10.5281/zenodo.23724393">https://doi.org/10.5281/zenodo.23724393</a></p>
+  </div>
+  <p class="small" style="margin-top:14px">Scripts: MIT licence. Instructions, reference files and templates: CC BY 4.0. 360° MDL is a trademark of the author. Feedback and bug reports: mlytras@acg.edu (subject "360° MDL Navigator").</p>
+</div></section>
+
+<footer><div class="wrap">
+  <div><b>Miltiadis D. Lytras</b><br>Deree — The American College of Greece · Effat University<br>ORCID <a href="https://orcid.org/0000-0002-7281-5458">0000-0002-7281-5458</a></div>
+  <div><b>360° MDL Navigator</b> · v0.1.1 beta, November 2026<br><a href="index.html">Home</a> · <a href="calculator.html">Calculator</a> · <a href="index.html#resources">Resources</a></div>
+</div></footer>
+</body>
+</html>

@@ -99,7 +99,7 @@ footer b{color:#fff}
 <nav><div class="wrap">
   <img src="assets/logo.png" alt=""><span class="name">360° MDL</span>
   <span class="links">
-    <a href="#method">The method</a><a href="#start">Start here</a><a href="#calculator">Calculator</a><a href="#indices">Indices</a><a href="#ai">Responsible AI</a><a href="#resources">Resources</a><a href="#cite">Cite</a>
+    <a href="#method">The method</a><a href="#start">Start here</a><a href="#navigator">Navigator</a><a href="#calculator">Calculator</a><a href="#indices">Indices</a><a href="#ai">Responsible AI</a><a href="#resources">Resources</a><a href="#cite">Cite</a>
   </span>
   <a class="cta" href="calculator.html">Open the calculator</a>
 </div></nav>
@@ -110,7 +110,8 @@ footer b{color:#fff}
     <h1>360° MDL<br><span>The Multidimensional Literature Review Model</span></h1>
     <p class="tag">A resilient, auditable way to review the literature: five evidence streams, three quality gates, seven phases and six indices that show how balanced, covered and robust a review really is.</p>
     <div class="btns">
-      <a class="btn primary" href="calculator.html">Open the index calculator</a>
+      <a class="btn primary" href="navigator.html">Get the Navigator (AI agent)</a>
+      <a class="btn ghost" href="calculator.html">Index calculator</a>
       <a class="btn ghost" href="https://doi.org/10.5281/zenodo.23777000">PhD Playbook (free PDF)</a>
       <a class="btn ghost" href="https://doi.org/10.5281/zenodo.23724393">Methodology &amp; toolkit</a>
     </div>
@@ -120,6 +121,7 @@ footer b{color:#fff}
       <div class="fact"><b>7</b><span>phases</span></div>
       <div class="fact"><b>6</b><span>indices</span></div>
       <div class="fact"><b>30</b><span>reporting items (MDL-RC)</span></div>
+      <div class="fact"><b>4</b><span>keys (Two-Key Rule)</span></div>
     </div>
   </div>
   <img class="logo" src="assets/logo.png" alt="360° MDL logo">
@@ -158,7 +160,7 @@ footer b{color:#fff}
     <div class="card top">
       <div class="who">Doctoral researcher</div>
       <h3>The PhD Literature Review Playbook</h3>
-      <p>A 12-week route from research question to a defensible review chapter, with the toolkit sheets filled in step by step. 42 pages, English and Greek editions.</p>
+      <p>A 12-week route from research question to a defensible review chapter, with the toolkit sheets filled in step by step. 42 pages, English and Greek editions. Week 3 milestone: your Core Knowledge, which the Navigator can build with you.</p>
       <div class="btns"><a class="btn primary" href="https://doi.org/10.5281/zenodo.23777000">English</a><a class="btn light" href="https://doi.org/10.5281/zenodo.23807964">Ελληνικά</a></div>
     </div>
     <div class="card top" style="border-top-color:var(--purple)">
@@ -172,6 +174,30 @@ footer b{color:#fff}
       <h3>Audit a review in minutes</h3>
       <p>Load a student's or author's toolkit into the calculator and read the indices, the portfolio checks and the reporting checklist. Nothing is uploaded; it runs in the browser.</p>
       <div class="btns"><a class="btn primary" href="calculator.html">Open the calculator</a><a class="btn light" href="360MDL_Index_Calculator_User_Guide.pdf">User Guide</a></div>
+    </div>
+  </div>
+</div></section>
+
+<section id="navigator" style="background:var(--navy);color:#fff"><div class="wrap">
+  <div class="eyebrow" style="color:#8FD3DC">New · AI agent · v0.1.1 beta</div>
+  <h2 style="color:#fff">360° MDL Navigator</h2>
+  <div class="two">
+    <div>
+      <p style="font-family:var(--serif);font-size:1.15rem;color:#CFD8E3">A Claude Skill that runs the whole method for you, from a topic sentence to a verified <b style="color:#fff">Core Knowledge</b> and a <b style="color:#fff">Knowledge Distillate</b>, under the Two-Key Rule: the agent proposes, you confirm at four keys.</p>
+      <ul class="plain" style="color:#CFD8E3">
+        <li>Drafts the Review Canvas, the search strings and the stream plan; imports your Scopus, Web of Science, Zotero or EndNote exports; searches the open APIs where it can and hands you the strings for the closed databases.</li>
+        <li>Proposes the 6R scores with a one-line justification each, curates the core corpus, codes the Master Table and drafts the key findings, all for your confirmation.</li>
+        <li>Builds the official toolkit, the indices, an honest gaps report, the methods section, the AI-use statement and the Knowledge Distillate with figures and references in APA or Harvard.</li>
+        <li>Never writes a reference from memory; every record carries its provenance and every action is logged.</li>
+      </ul>
+      <div class="btns" style="margin-top:14px"><a class="btn primary" href="navigator.html">Install and start</a><a class="btn ghost" href="https://github.com/mlytras/360mdl">Source on GitHub</a></div>
+    </div>
+    <div style="background:#fff;border-radius:12px;padding:18px 20px;color:var(--fg);font-size:.92rem">
+      <div class="eyebrow">How a session goes</div>
+      <p><b>You:</b> Start a 360° MDL review on smart cities and the energy transition in the Arab region, Standard tier. Scopus export attached.</p>
+      <p><b>Navigator:</b> Here is the Review Canvas: four review questions, scope 2015–2026, six preliminary clusters, streams F1–F5 … Please edit and approve (Key 1).</p>
+      <p><b>Navigator:</b> 94 records, 91 unique, 85 Pass / 6 Reserve as proposed. Item 1 of 85: WOS-IMP-01, scores 2·2·2·1·2·1, reasons … Confirm, change or skip?</p>
+      <p><b>Navigator:</b> Core Knowledge v1 built: SBI 0.92, CovI 1.00, MDI 0.86, RI 0.90, LOSO 0.80. Gaps: F3 is 7 % of the core; three findings rest on two families. Shall I search IRENA and IEA for the clusters K2 and K4?</p>
     </div>
   </div>
 </div></section>
@@ -237,6 +263,7 @@ footer b{color:#fff}
     <tr><td><b>Methodology, Version 2026</b></td><td>Specification, Researcher Handbook, Quick Start, Excel toolkit T1–T17, figures, MDL-RC 2026 checklist (13 files)</td><td><a href="https://doi.org/10.5281/zenodo.23724393">doi:10.5281/zenodo.23724393</a></td></tr>
     <tr><td><b>The PhD Literature Review Playbook</b></td><td>12-week step-by-step guide for doctoral researchers, 42 pp</td><td><a href="https://doi.org/10.5281/zenodo.23777000">doi:10.5281/zenodo.23777000</a></td></tr>
     <tr><td><b>Οδηγός Βιβλιογραφικής Ανασκόπησης για Διδακτορικούς</b></td><td>Greek edition of the Playbook</td><td><a href="https://doi.org/10.5281/zenodo.23807964">doi:10.5281/zenodo.23807964</a></td></tr>
+    <tr><td><b>Navigator, v0.1.1</b></td><td>Claude Skill that executes the method under the Two-Key Rule; install guide and worked example</td><td><a href="navigator.html">mlytras.github.io/360mdl/navigator.html</a> · <a href="https://github.com/mlytras/360mdl">GitHub</a></td></tr>
     <tr><td><b>Index Calculator, beta 1</b></td><td>Browser tool, User Guide and Claude protocol</td><td><a href="https://doi.org/10.5281/zenodo.24033376">doi:10.5281/zenodo.24033376</a></td></tr>
     <tr><td><b>Applied reviews and open data</b></td><td>Two full demonstrations with record-level data (supplementary S1–S7)</td><td><a href="https://doi.org/10.5281/zenodo.23772941">doi:10.5281/zenodo.23772941</a></td></tr>
     <tr><td><b>Community</b></td><td>Deposit your 360° MDL review or protocol; all records in one place</td><td><a href="https://zenodo.org/communities/360mdl">zenodo.org/communities/360mdl</a></td></tr>
