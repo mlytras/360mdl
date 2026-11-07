@@ -1,0 +1,530 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>360° MDL Index Calculator</title>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+/* Layout: a working instrument. Input rail on the left, results stacked on the right; stacks to one column on phones. */
+:root{
+  --bg:#F5F7F9; --surface:#FFFFFF; --fg:#17202E; --muted:#5E6B7C; --line:#D9DFE6;
+  --navy:#14213D; --accent:#0F7C8C; --accent-soft:#E2F1F3; --amber:#B9782A; --amber-soft:#FBF1E1; --coral:#B8452F; --coral-soft:#F9E6E1; --good:#1C7A5F; --good-soft:#E0F2EA;
+  --f1:#1F4E79; --f2:#7B3F99; --f3:#E09F3E; --f4:#2A9D8F; --f5:#C8553D;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,Segoe UI,sans-serif; --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bg:#0F1623; --surface:#172033; --fg:#E7ECF2; --muted:#9AA7B8; --line:#2A3547; --navy:#E7ECF2; --accent:#5CC3D0; --accent-soft:#163740; --amber:#E0B06A; --amber-soft:#3A2E17; --coral:#F08A74; --coral-soft:#3F2019; --good:#5FCBA3; --good-soft:#163B2E; color-scheme:dark } }
+:root[data-theme="dark"]{ --bg:#0F1623; --surface:#172033; --fg:#E7ECF2; --muted:#9AA7B8; --line:#2A3547; --navy:#E7ECF2; --accent:#5CC3D0; --accent-soft:#163740; --amber:#E0B06A; --amber-soft:#3A2E17; --coral:#F08A74; --coral-soft:#3F2019; --good:#5FCBA3; --good-soft:#163B2E; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+a{color:var(--accent)}
+h1,h2,h3{text-wrap:balance;margin:0}
+h1{font-size:1.5rem;font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.05rem;font-weight:700;color:var(--navy)}
+h3{font-size:.95rem;font-weight:600}
+.eyebrow{font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.muted{color:var(--muted)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+header.top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between;padding-block:22px 14px;border-bottom:1px solid var(--line);margin-bottom:18px}
+header.top .brand{display:flex;gap:14px;align-items:center}
+.badge{display:inline-block;font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);letter-spacing:.04em}
+.wrap{display:grid;grid-template-columns:minmax(0,360px) minmax(0,1fr);gap:22px;max-width:1240px;margin:0 auto}
+@media (max-width:900px){.wrap{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;min-width:0}
+.rail{display:flex;flex-direction:column;gap:16px;position:sticky;top:12px;align-self:start}
+@media (max-width:900px){.rail{position:static}}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:8px 10px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer}
+.tabs button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+.tabs button:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.drop{border:1.5px dashed var(--line);border-radius:8px;padding:18px 14px;text-align:center;color:var(--muted);cursor:pointer}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop input{display:none}
+.btn{font:inherit;font-weight:600;font-size:.9rem;padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.small{padding:5px 10px;font-size:.8rem}
+.btn:disabled{opacity:.5;cursor:default}
+.field{display:grid;gap:4px;margin-bottom:10px}
+.field label{font-size:.82rem;font-weight:600;color:var(--muted)}
+.field input,.field select{font:inherit;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg);width:100%}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.grid5 input,.grid3 input{font:inherit;font-family:var(--mono);padding:6px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg);width:100%;text-align:center}
+.famlab{font-size:.72rem;font-weight:700;text-align:center;color:#fff;border-radius:4px;padding:2px 0}
+.status{font-size:.85rem;padding:8px 10px;border-radius:6px;background:var(--accent-soft);color:var(--fg)}
+.status.err{background:var(--coral-soft)}
+.results{display:flex;flex-direction:column;gap:18px;min-width:0}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tile{border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:var(--surface);border-top:3px solid var(--line)}
+.tile.pass{border-top-color:var(--good)} .tile.check{border-top-color:var(--amber)} .tile.report{border-top-color:var(--accent)}
+.tile .k{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tile .v{font-family:var(--mono);font-size:1.6rem;font-weight:500;line-height:1.2;margin-top:2px}
+.tile .t{font-size:.78rem;color:var(--muted)}
+.pill{display:inline-block;font-size:.7rem;font-weight:700;padding:1px 7px;border-radius:999px;margin-left:6px;vertical-align:middle}
+.pill.pass{background:var(--good-soft);color:var(--good)} .pill.check{background:var(--amber-soft);color:var(--amber)} .pill.report{background:var(--accent-soft);color:var(--accent)} .pill.fail{background:var(--coral-soft);color:var(--coral)}
+table{width:100%;border-collapse:collapse;font-size:.86rem}
+th{text-align:left;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--line)}
+td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+td.num{font-family:var(--mono);text-align:right;font-variant-numeric:tabular-nums}
+.tscroll{overflow-x:auto}
+.chip{display:inline-block;font-size:.7rem;font-weight:700;color:#fff;border-radius:4px;padding:1px 6px;margin:1px 2px 1px 0}
+.chip.off{opacity:.18}
+.fig{overflow-x:auto}
+svg text{font-family:var(--sans)}
+.kfrow{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.kfrow input[type=text]{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg);width:100%}
+.famchecks{display:flex;gap:4px}
+.famchecks label{font-size:.7rem;font-weight:700;color:#fff;border-radius:4px;padding:2px 6px;cursor:pointer;opacity:.25;user-select:none}
+.famchecks input{display:none}
+.famchecks input:checked + span{opacity:1}
+.famchecks label span{display:inline-block}
+.cl{display:grid;grid-template-columns:28px 24px 1fr auto;gap:8px;align-items:start;padding:6px 0;border-bottom:1px solid var(--line);font-size:.86rem}
+.cl .n{font-family:var(--mono);color:var(--muted)}
+.cl input[type=checkbox]{margin-top:3px}
+pre.out{font-family:var(--mono);font-size:.78rem;white-space:pre-wrap;word-break:break-word;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px;max-height:320px;overflow:auto;margin:0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sent{font-style:italic;border-left:3px solid var(--accent);padding:4px 12px;margin:8px 0}
+footer{max-width:1240px;margin:28px auto 0;padding-top:14px;border-top:1px solid var(--line);font-size:.82rem;color:var(--muted);display:grid;gap:6px}
+@media (prefers-reduced-motion:no-preference){.tile{transition:border-color .2s}}
+.figgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.figcard{border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--surface);display:flex;flex-direction:column;gap:8px;min-width:0}
+.figcard img{width:100%;height:auto;border:1px solid var(--line);border-radius:4px;background:#fff}
+.figcap{font-size:.82rem}
+a.btn{text-decoration:none;display:inline-block}
+</style>
+
+</head><body><header class="top">
+  <div class="brand">
+    <svg width="46" height="46" viewBox="0 0 100 100" aria-hidden="true"><g fill="none" stroke-width="11"><circle cx="50" cy="50" r="40" stroke="#1F4E79" stroke-dasharray="50 251" transform="rotate(-90 50 50)"/><circle cx="50" cy="50" r="40" stroke="#7B3F99" stroke-dasharray="50 251" stroke-dashoffset="-50" transform="rotate(-90 50 50)"/><circle cx="50" cy="50" r="40" stroke="#E09F3E" stroke-dasharray="50 251" stroke-dashoffset="-100" transform="rotate(-90 50 50)"/><circle cx="50" cy="50" r="40" stroke="#2A9D8F" stroke-dasharray="50 251" stroke-dashoffset="-150" transform="rotate(-90 50 50)"/><circle cx="50" cy="50" r="40" stroke="#C8553D" stroke-dasharray="50 251" stroke-dashoffset="-200" transform="rotate(-90 50 50)"/></g><text x="50" y="56" text-anchor="middle" font-size="22" font-weight="700" fill="currentColor">360°</text></svg>
+    <div>
+      <div class="eyebrow">360° MDL · Version 2026</div>
+      <h1>360° MDL Index Calculator <span class="badge">beta 1</span></h1>
+      <div class="muted" style="font-size:.88rem">Indices, portfolio checks, flow diagram and reporting checklist for a 360° MDL literature review. Everything runs in your browser; nothing is uploaded.</div>
+    </div>
+  </div>
+  <div class="row"><a class="btn small" href="https://doi.org/10.5281/zenodo.23724393" target="_blank" rel="noopener">Methodology &amp; Excel toolkit</a><a class="btn small" href="https://doi.org/10.5281/zenodo.23777000" target="_blank" rel="noopener">PhD Playbook</a></div>
+</header>
+
+<div class="wrap">
+  <aside class="rail">
+    <section class="panel">
+      <div class="tabs" role="tablist">
+        <button role="tab" aria-selected="true" data-tab="upload">Upload toolkit</button>
+        <button role="tab" aria-selected="false" data-tab="manual">Enter manually</button>
+      </div>
+      <div id="tab-upload">
+        <p class="muted" style="font-size:.85rem;margin:0 0 10px">Upload your filled <strong>360MDL_Toolkit_v2026.xlsx</strong>. The calculator reads sheets T4 (6R Quality Gate), T6 (Master Table), M4 (Keyword Coverage) and T15 (Triangulation).</p>
+        <label class="drop" id="drop"><input type="file" id="file" accept=".xlsx,.xlsm"><strong>Choose a file</strong> or drop it here<br><span style="font-size:.8rem">.xlsx · stays on your device</span></label>
+        <div style="height:10px"></div>
+        <div class="row"><button class="btn small" id="loadSample">Load the illustrative example</button></div>
+        <div id="status" class="status" style="margin-top:10px" hidden></div>
+      </div>
+      <div id="tab-manual" hidden>
+        <div class="field"><label for="mTier">Tier</label><select id="mTier"><option>Lite</option><option selected>Standard</option><option>Advanced</option></select></div>
+        <div class="field"><label>Core corpus items per stream family</label>
+          <div class="grid5"><span class="famlab" style="background:var(--f1)">F1</span><span class="famlab" style="background:var(--f2)">F2</span><span class="famlab" style="background:var(--f3)">F3</span><span class="famlab" style="background:var(--f4)">F4</span><span class="famlab" style="background:var(--f5)">F5</span>
+          <input id="c1" type="number" min="0" value="18"><input id="c2" type="number" min="0" value="9"><input id="c3" type="number" min="0" value="6"><input id="c4" type="number" min="0" value="6"><input id="c5" type="number" min="0" value="9"></div></div>
+        <div class="field"><label>Core items per method family (9 families)</label>
+          <div class="grid3" id="methodInputs"></div></div>
+        <div class="field"><label>Keyword clusters</label>
+          <div class="grid3"><input id="mClusters" type="number" min="1" value="10" title="Number of clusters"><input id="mCovered" type="number" min="0" value="10" title="Clusters with enough core items"><span class="muted" style="font-size:.75rem;align-self:center">total · covered</span></div></div>
+        <div class="field"><label>Gate counts (for the flow diagram)</label>
+          <div class="grid3"><input id="gHarv" type="number" min="0" value="70" title="Records harvested"><input id="gUniq" type="number" min="0" value="64" title="Unique after de-duplication"><input id="gElig" type="number" min="0" value="64" title="Eligible after Gate 1"></div>
+          <div class="grid3" style="margin-top:6px"><input id="gPass" type="number" min="0" value="52" title="Gate 2 pass"><input id="gRes" type="number" min="0" value="6" title="Gate 2 reserve"><input id="gExc" type="number" min="0" value="6" title="Gate 2 exclude"></div>
+          <div class="muted" style="font-size:.72rem">harvested · unique · eligible / pass · reserve · exclude</div></div>
+        <div class="field"><label for="mConv">Core items found in two or more streams</label><input id="mConv" type="number" min="0" value="16"></div>
+        <div class="field"><label>Key findings and supporting stream families</label>
+          <div id="kfManual"></div>
+          <div class="row" style="margin-top:8px"><button class="btn small" id="addKF">+ Add key finding</button></div></div>
+        <button class="btn primary" id="computeManual">Compute</button>
+      </div>
+    </section>
+    <section class="panel" style="font-size:.84rem">
+      <div class="eyebrow">How to cite</div>
+      <p style="margin:6px 0 0">Lytras, M. D. (2026). <em>360° MDL: The Multidimensional Literature Review Model — Version 2026</em>. Zenodo. https://doi.org/10.5281/zenodo.23724393</p>
+    </section>
+  </aside>
+
+  <main class="results">
+    <section class="panel">
+      <div class="row" style="justify-content:space-between">
+        <div><div class="eyebrow">Index dashboard</div><h2 id="dsTitle">—</h2><div class="muted" id="dsSub" style="font-size:.85rem"></div></div>
+        <div class="field" style="margin:0"><label for="tier">Tier for targets</label><select id="tier"><option>Lite</option><option selected>Standard</option><option>Advanced</option></select></div>
+      </div>
+      <div class="tiles" id="tiles" style="margin-top:12px"></div>
+    </section>
+
+    <section class="panel">
+      <div class="eyebrow">Gate 3 · CCD portfolio checks</div>
+      <div class="tscroll"><table id="ccd"></table></div>
+    </section>
+
+    <section class="panel">
+      <div class="eyebrow">Flow diagram · PRISMA 2020-compatible</div>
+      <div class="fig" id="flow"></div>
+      <div class="muted" style="font-size:.8rem">Counts per stream family and per gate. Copy the numbers into your Methods section or redraw the diagram with the template F08 of the toolkit.</div>
+    </section>
+
+    <section class="panel">
+      <div class="eyebrow">Triangulation &amp; resilience · T15</div>
+      <div class="tscroll"><table id="tri"></table></div>
+    </section>
+
+    <section class="panel">
+      <div class="row" style="justify-content:space-between"><div><div class="eyebrow">Reporting checklist · MDL-RC 2026</div><div class="muted" style="font-size:.85rem">Items with a computed status are filled automatically. Tick the rest as you report them.</div></div><div class="mono" id="rcScore"></div></div>
+      <div id="checklist" style="margin-top:8px"></div>
+    </section>
+
+    <section class="panel">
+      <div class="eyebrow">Figures and tables for your paper</div>
+      <div class="muted" style="font-size:.85rem;margin-bottom:10px">Publication-ready PNG images (2× resolution, white background) generated from your data: the flow diagram, five analysis figures and three stream-analysis tables. Cite the methodology when you use them.</div>
+      <div id="figures" class="figgrid"></div>
+    </section>
+
+    <section class="panel">
+      <div class="eyebrow">Report</div>
+      <p class="sent" id="sentence"></p>
+      <div class="row"><button class="btn small" id="copySentence">Copy methods sentence</button><button class="btn small" id="copyReport">Copy full report (text)</button><button class="btn small" id="copyJSON">Copy JSON</button><span class="muted" id="copyMsg" style="font-size:.8rem"></span></div>
+      <pre class="out" id="report" style="margin-top:10px"></pre>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <div><strong>360° MDL Index Calculator, beta 1 (November 2026).</strong> Free and open source (MIT licence). Cite as: Lytras, M. D. (2026). 360° MDL Index Calculator (beta 1) [Software]. Zenodo. <a href="https://doi.org/10.5281/zenodo.24033376" target="_blank" rel="noopener">https://doi.org/10.5281/zenodo.24033376</a>. User Guide and Claude protocol included in the Zenodo record. Definitions follow the 360° MDL specification, Version 2026, §7: SBI = H/ln k over stream families; CovI = share of clusters with ≥ 3 core items (Lite ≥ 2); MDI = H/ln 9 over method families; TS = number of supporting families; RI = (#Robust + 0.5 × #Supported)/#KF; LOSO = worst-case share of findings keeping TS ≥ 2 after removing one family.</div>
+  <div>Your file is processed locally and never leaves your browser. Questions, bugs and suggestions: Prof. Miltiadis D. Lytras, <span class="mono">mlytras@acg.edu</span> (subject “360° MDL tool”). Reviews using the method: <a href="https://zenodo.org/communities/360mdl" target="_blank" rel="noopener">zenodo.org/communities/360mdl</a>.</div>
+</footer>
+
+<script>
+const SAMPLE={"name": "Illustrative example: Smart Cities (360° MDL Toolkit v2026 EXAMPLE)", "tier": "Standard", "items": [["WOS-IMP-01", [2, 2, 2, 1, 2, 1], 3], ["WOS-IMP-02", [2, 2, 2, 1, 2, 1], 2], ["WOS-IMP-03", [2, 2, 2, 0, 2, 1], 2], ["WOS-IMP-04", [2, 2, 2, 1, 1, 1], 1], ["WOS-REC-01", [2, 2, 1, 2, 2, 1], 1], ["WOS-REC-02", [2, 2, 1, 2, 1, 1], 1], ["WOS-FRO-01", [2, 2, 1, 2, 2, 1], 2], ["WOS-FRO-02", [2, 2, 1, 2, 2, 1], 1], ["WOS-FRO-03", [2, 2, 1, 2, 1, 1], 1], ["SCO-IMP-01", [2, 2, 2, 1, 1, 1], 2], ["SCO-IMP-02", [2, 2, 2, 1, 2, 1], 1], ["SCO-IMP-03", [2, 2, 2, 1, 1, 1], 3], ["SCO-REC-01", [2, 2, 1, 2, 1, 1], 1], ["SCO-FRO-01", [2, 2, 1, 2, 1, 1], 1], ["SCO-FRO-02", [2, 1, 1, 2, 2, 1], 1], ["SCO-FRO-03", [2, 2, 1, 2, 1, 1], 1], ["GSC-TOP-01", [2, 2, 2, 0, 2, 1], 3], ["GSC-TOP-02", [2, 2, 2, 1, 1, 1], 2], ["HCR-MC-01", [2, 2, 2, 1, 2, 1], 2], ["HCR-MC-02", [2, 2, 2, 1, 2, 1], 2], ["HCR-MC-03", [2, 2, 2, 1, 1, 1], 1], ["HCR-MR-01", [2, 2, 1, 2, 2, 1], 1], ["HCR-MR-02", [2, 2, 1, 2, 1, 1], 1], ["T2P-MC-01", [2, 2, 2, 1, 1, 1], 1], ["T2P-MC-02", [2, 2, 2, 1, 2, 1], 2], ["GSP-MR-01", [2, 2, 1, 2, 1, 2], 1], ["RCO-MC-01", [2, 2, 2, 1, 1, 1], 1], ["IND-WP-01", [2, 1, 1, 2, 1, 1], 1], ["IND-WP-02", [2, 1, 1, 2, 1, 1], 1], ["IND-WP-03", [2, 1, 1, 2, 1, 1], 1], ["IND-WP-04", [2, 1, 1, 2, 2, 1], 2], ["IND-WP-05", [2, 1, 1, 2, 1, 1], 1], ["IND-WP-06", [2, 1, 1, 2, 1, 1], 1], ["GOV-PP-01", [2, 2, 1, 2, 1, 1], 2], ["GOV-PP-02", [2, 2, 2, 2, 1, 1], 2], ["GOV-PP-03", [2, 2, 1, 2, 1, 1], 1], ["GOV-PP-04", [2, 2, 1, 2, 1, 1], 2], ["GOV-PP-05", [2, 2, 1, 2, 1, 1], 1], ["GOV-PP-06", [2, 2, 1, 2, 1, 1], 1], ["EMV-GLS-01", [2, 2, 1, 2, 2, 2], 2], ["EMV-GLS-02", [2, 2, 1, 2, 2, 2], 1], ["EMV-GLS-03", [2, 2, 1, 2, 2, 2], 1], ["EMV-RIS-01", [2, 2, 2, 2, 1, 1], 1], ["EMV-RIS-02", [2, 2, 2, 2, 1, 1], 1], ["EMV-REG-01", [2, 1, 1, 2, 1, 2], 1], ["EMV-PRE-01", [2, 1, 1, 2, 2, 1], 1], ["EMV-CRI-01", [2, 2, 1, 2, 2, 2], 1], ["EMV-CRI-02", [2, 2, 1, 2, 1, 2], 1], ["WOS-IMP-05", [2, 2, 2, 1, 1, 0], 1], ["SCO-IMP-04", [2, 2, 2, 1, 1, 0], 2], ["GSC-TOP-03", [2, 1, 2, 0, 2, 1], 1], ["IND-WP-07", [2, 1, 0, 2, 1, 1], 1], ["WOS-REC-03", [1, 1, 1, 2, 0, 0], 1], ["SCO-REC-02", [1, 1, 1, 2, 1, 0], 1], ["HCR-MR-03", [1, 1, 1, 2, 0, 1], 1], ["T2P-MR-01", [1, 2, 1, 1, 1, 0], 1], ["GOV-PP-07", [2, 0, 0, 2, 1, 1], 1], ["EMV-PRE-02", [1, 1, 0, 2, 1, 1], 1], ["IND-WP-08", [2, 0, 1, 2, 1, 1], 1], ["WOS-FRO-04", [0, 2, 1, 1, 0, 0], 1], ["SCO-FRO-04", [0, 2, 1, 1, 0, 0], 1], ["GSC-TOP-04", [1, 0, 1, 0, 1, 0], 1], ["ADS-MC-01", [1, 1, 0, 0, 1, 0], 1], ["EMV-REG-02", [1, 0, 0, 1, 1, 0], 1]], "core": [["WOS-IMP-01", "Conceptual/Theoretical", "Group 01 [Illustrative]"], ["WOS-IMP-02", "Qualitative", "Group 02 [Illustrative]"], ["WOS-IMP-03", "Design science/Artefact", "Group 03 [Illustrative]"], ["WOS-IMP-04", "Quantitative", "Group 04 [Illustrative]"], ["WOS-REC-01", "Mixed", "Group 05 [Illustrative]"], ["WOS-REC-02", "Quantitative", "Group 06 [Illustrative]"], ["WOS-FRO-01", "Simulation/Modelling", "Group 07 [Illustrative]"], ["WOS-FRO-02", "Qualitative", "Group 08 [Illustrative]"], ["WOS-FRO-03", "Quantitative", "Group 09 [Illustrative]"], ["SCO-IMP-01", "Simulation/Modelling", "Group 10 [Illustrative]"], ["SCO-IMP-02", "Conceptual/Theoretical", "Group 11 [Illustrative]"], ["SCO-IMP-03", "Review/Bibliometric", "Group 12 [Illustrative]"], ["SCO-REC-01", "Quantitative", "Group 13 [Illustrative]"], ["SCO-FRO-01", "Quantitative", "Group 14 [Illustrative]"], ["SCO-FRO-02", "Case study", "Group 15 [Illustrative]"], ["SCO-FRO-03", "Design science/Artefact", "Group 16 [Illustrative]"], ["GSC-TOP-01", "Review/Bibliometric", "Group 17 [Illustrative]"], ["GSC-TOP-02", "Mixed", "Group 18 [Illustrative]"], ["HCR-MC-01", "Quantitative", "Group 19 [Illustrative]"], ["HCR-MC-02", "Conceptual/Theoretical", "Influencer group H1 [Illustrative]"], ["HCR-MC-03", "Design science/Artefact", "Group 21 [Illustrative]"], ["HCR-MR-01", "Mixed", "Influencer group H1 [Illustrative]"], ["HCR-MR-02", "Case study", "Group 23 [Illustrative]"], ["T2P-MC-01", "Simulation/Modelling", "Group 24 [Illustrative]"], ["T2P-MC-02", "Qualitative", "Group 25 [Illustrative]"], ["GSP-MR-01", "Mixed", "Group 26 [Illustrative]"], ["RCO-MC-01", "Quantitative", "Group 27 [Illustrative]"], ["IND-WP-01", "Case study", "Group 28 [Illustrative]"], ["IND-WP-02", "Delphi/Expert", "Group 29 [Illustrative]"], ["IND-WP-03", "Case study", "Group 30 [Illustrative]"], ["IND-WP-04", "Case study", "Group 31 [Illustrative]"], ["IND-WP-05", "Conceptual/Theoretical", "Group 32 [Illustrative]"], ["IND-WP-06", "Quantitative", "Group 33 [Illustrative]"], ["GOV-PP-01", "Review/Bibliometric", "Group 34 [Illustrative]"], ["GOV-PP-02", "Delphi/Expert", "Group 35 [Illustrative]"], ["GOV-PP-03", "Case study", "Group 36 [Illustrative]"], ["GOV-PP-04", "Conceptual/Theoretical", "Group 37 [Illustrative]"], ["GOV-PP-05", "Review/Bibliometric", "Group 38 [Illustrative]"], ["GOV-PP-06", "Qualitative", "Group 39 [Illustrative]"], ["EMV-GLS-01", "", "Mutambik, I. et al."], ["EMV-GLS-02", "", "Alamoudi, A. K. et al."], ["EMV-GLS-03", "Qualitative", "Group 40 [Illustrative]"], ["EMV-RIS-01", "Mixed", "Group 41 [Illustrative]"], ["EMV-RIS-02", "Quantitative", "Group 42 [Illustrative]"], ["EMV-REG-01", "Case study", "Group 43 [Illustrative]"], ["EMV-PRE-01", "Design science/Artefact", "Group 44 [Illustrative]"], ["EMV-CRI-01", "Qualitative", "Group 45 [Illustrative]"], ["EMV-CRI-02", "Quantitative", "Group 46 [Illustrative]"]], "clusters": ["Governance & Leadership", "Citizen Participation", "Data & Open Government Data", "IoT & Infrastructure", "Sustainability & Environment", "Mobility", "Energy", "Digital Twins & AI", "Privacy & Security", "Economic Value & Innovation"], "coverage": {"WOS-IMP-01": [0, 2], "WOS-IMP-02": [0, 1], "WOS-IMP-03": [3, 5], "WOS-IMP-04": [4, 9], "WOS-REC-01": [0, 7], "WOS-REC-02": [3, 8], "WOS-FRO-01": [4, 7], "WOS-FRO-02": [1, 2, 9], "WOS-FRO-03": [4, 5], "SCO-IMP-01": [3, 6], "SCO-IMP-02": [2, 8], "SCO-IMP-03": [0, 7, 9], "SCO-REC-01": [5, 7], "SCO-FRO-01": [0, 1], "SCO-FRO-02": [4, 6], "SCO-FRO-03": [2, 3], "GSC-TOP-01": [0, 4, 9], "GSC-TOP-02": [2, 9], "HCR-MC-01": [1, 8], "HCR-MC-02": [0, 9], "HCR-MC-03": [3, 7], "HCR-MR-01": [0, 7, 8], "HCR-MR-02": [4, 5], "T2P-MC-01": [3, 6], "T2P-MC-02": [0, 2], "GSP-MR-01": [1, 3], "RCO-MC-01": [4, 9], "IND-WP-01": [2, 3, 9], "IND-WP-02": [3, 7], "IND-WP-03": [6, 9], "IND-WP-04": [5, 9], "IND-WP-05": [3, 8], "IND-WP-06": [2, 9], "GOV-PP-01": [0, 1], "GOV-PP-02": [0, 4], "GOV-PP-03": [1, 2], "GOV-PP-04": [7, 8], "GOV-PP-05": [4, 6], "GOV-PP-06": [2, 8], "EMV-GLS-01": [0, 2], "EMV-GLS-02": [1, 4], "EMV-GLS-03": [0, 3, 9], "EMV-RIS-01": [1, 7], "EMV-RIS-02": [3, 4], "EMV-REG-01": [1, 9], "EMV-PRE-01": [7, 8], "EMV-CRI-01": [1, 8], "EMV-CRI-02": [4, 6]}, "kfs": [["KF1", "Governance and leadership capacity is a precondition for smart-city transformation.", ["F1", "F2", "F4", "F5"], "WOS-IMP-01; SCO-FRO-01; HCR-MC-02; GOV-PP-01; EMV-GLS-01; EMV-GLS-03"], ["KF2", "Structured citizen participation increases legitimacy and uptake of smart-city services.", ["F1", "F4", "F5"], "WOS-IMP-02; GOV-PP-03; EMV-REG-01"], ["KF3", "Open data generates value only when combined with data governance and interoperability.", ["F1", "F3", "F4"], "WOS-FRO-02; SCO-FRO-03; IND-WP-06; GOV-PP-03"], ["KF4", "Interoperability of IoT infrastructure is the main barrier to scaling pilots.", ["F1", "F2", "F3"], "WOS-IMP-03; HCR-MC-03; IND-WP-01; IND-WP-05"], ["KF5", "Sustainability outcomes are rarely measured with consistent, comparable indicators.", ["F1", "F3", "F4", "F5"], "WOS-IMP-04; RCO-MC-01; IND-WP-01; GOV-PP-02; EMV-RIS-02"], ["KF6", "Digital twins and AI are promising capabilities, but evidence remains mostly pilot-level.", ["F1", "F2", "F3", "F5"], "WOS-FRO-01; HCR-MR-01; IND-WP-02; EMV-RIS-01"], ["KF7", "Trust, privacy and security are decisive conditions for adoption.", ["F1", "F2", "F4"], "SCO-IMP-02; HCR-MC-01; GOV-PP-06"], ["KF8", "Data-driven mobility services produce measurable efficiency gains.", ["F1", "F3"], "WOS-FRO-03; SCO-REC-01; IND-WP-04"], ["KF9", "The economic value of smart energy depends on regulation and user behaviour.", ["F3", "F4"], "IND-WP-03; GOV-PP-05"], ["KF10", "Global South cities pursue distinct leapfrogging pathways.", ["F5"], "EMV-GLS-03"], ["KF11", "", [], ""], ["KF12", "", [], ""], ["KF13", "", [], ""], ["KF14", "", [], ""], ["KF15", "", [], ""]]};
+const FAM = ['F1','F2','F3','F4','F5'];
+const FAMNAME = {F1:'Academic databases',F2:'Influencer scholarship',F3:'Industry practice',F4:'Policy & global organisations',F5:'Emerging & diverse voices'};
+const FAMCOL = {F1:'var(--f1)',F2:'var(--f2)',F3:'var(--f3)',F4:'var(--f4)',F5:'var(--f5)'};
+const STREAMFAM = {WOS:'F1',SCO:'F1',GSC:'F1',DOM:'F1',PUB:'F1',HCR:'F2',T2P:'F2',GSP:'F2',RCO:'F2',ADS:'F2',INS:'F2',IND:'F3',GOV:'F4',EMV:'F5',AUT:'F2'};
+const METHODS = ['Quantitative','Qualitative','Mixed','Design science/Artefact','Conceptual/Theoretical','Review/Bibliometric','Simulation/Modelling','Case study','Delphi/Expert'];
+const TARGETS = {
+  Lite:{sbi:0.70,covi:0.80,mdi:0.60,ri:0.60,loso:null,core:[20,30],covMin:2,f5:0.10,streamsMin:3,greyReq:false},
+  Standard:{sbi:0.70,covi:0.80,mdi:0.60,ri:0.60,loso:null,core:[40,50],covMin:3,f5:0.10,streamsMin:4,greyReq:true},
+  Advanced:{sbi:0.70,covi:0.80,mdi:0.60,ri:0.60,loso:0.70,core:[30,50],covMin:3,f5:0.15,streamsMin:5,greyReq:true}
+};
+const RC = [
+ ['Title & abstract',1,'Identify the review as a 360° MDL review and state the tier and mode'],['Title & abstract',2,'Structured abstract including streams, corpus size, matrices and Resilience Index'],
+ ['Introduction',3,'Rationale and the knowledge problem'],['Introduction',4,'Review questions'],
+ ['Protocol (P1)',5,'Review Canvas: scope, time window, languages, disciplines'],['Protocol (P1)',6,'Protocol registration (registry and ID) or justification'],['Protocol (P1)',7,'Team, roles and calibration procedure'],
+ ['Sourcing (P2)',8,'Streams and slices used, with rationale (≥ 3)'],['Sourcing (P2)',9,'Full search strings, filters and dates per stream (Stream Log)'],['Sourcing (P2)',10,'Influencer identification sources and profile-selection rules (if Approach B)'],['Sourcing (P2)',11,'Emerging & Diverse Voices strategy (if Approach C)'],
+ ['Selection (P3)',12,'Eligibility criteria and de-duplication; Convergence Flags'],['Selection (P3)',13,'6R scoring scheme, thresholds and calibration (κ)'],['Selection (P3)',14,'CCD curation decisions and portfolio rules'],['Selection (P3)',15,'Flow diagram with numbers per stream and per gate'],
+ ['Codification (P4)',16,'ID scheme and Master Table fields'],['Codification (P4)',17,'Keyword-unification procedure and final cluster list'],
+ ['Analysis (P5)',18,'Matrices used (≥ 3) and coding rules'],['Analysis (P5)',19,'Contribution taxonomy applied'],['Analysis (P5)',20,'Coverage heatmap and Coverage Index'],['Analysis (P5)',21,'Method diversity (M2) and MDI'],
+ ['Synthesis (P6)',22,'Key findings with Triangulation Strength'],['Synthesis (P6)',23,'Resilience Index and (Advanced) LOSO test'],['Synthesis (P6)',24,'Academic–practice–policy convergence and divergence'],['Interpretation (P6)',25,'Interpretation and exploitation (M7)'],['Interpretation (P6)',26,'Value-Based Framework (M8) and its derivation from the evidence'],['Interpretation (P6)',27,'Research agenda from M5/M6'],
+ ['Transparency (P7)',28,'Open data: matrices and Stream Log as supplementary files'],['Transparency (P7)',29,'AI-use statement (tools, tasks, verification)'],['Transparency (P7)',30,'Limitations (stream coverage, language, metrics bias) and update plan']
+];
+const $ = id => document.getElementById(id);
+const fmt = (x, d=2) => (x==null||isNaN(x)) ? '—' : x.toFixed(d);
+const entropy = counts => { const n = counts.reduce((a,b)=>a+b,0); if(!n) return 0; return -counts.filter(c=>c>0).reduce((s,c)=>{const p=c/n; return s+p*Math.log(p);},0); };
+let DATA = null, RESULT = null, ticks = {};
+
+function famOf(id){ const code = String(id||'').split('-')[0].toUpperCase(); return STREAMFAM[code] || null; }
+
+// ---------- normalised model → results ----------
+function compute(m, tierName){
+  const T = TARGETS[tierName];
+  const coreCounts = FAM.map(f => m.coreByFamily[f]||0); const N = coreCounts.reduce((a,b)=>a+b,0);
+  const k = coreCounts.filter(c=>c>0).length;
+  const sbi = k>1 ? entropy(coreCounts)/Math.log(k) : 0;
+  const mcounts = METHODS.map(x => m.methodCounts[x]||0); const mTot = mcounts.reduce((a,b)=>a+b,0);
+  const mdi = mTot ? entropy(mcounts)/Math.log(9) : null; const mFam = mcounts.filter(c=>c>0).length;
+  let covi = null, nClusters = m.nClusters||0, covered = 0;
+  if (m.clusterCounts){ nClusters = m.clusterCounts.length; covered = m.clusterCounts.filter(c=>c>=T.covMin).length; covi = nClusters? covered/nClusters : null; }
+  else if (m.nClusters){ covered = m.covered||0; covi = covered/m.nClusters; }
+  const kfs = (m.kfs||[]).map(kf => { const fams = kf.families.filter(f=>FAM.includes(f)); const ts = new Set(fams).size; return {...kf, families:[...new Set(fams)], ts, cls: ts>=3?'Robust':ts===2?'Supported':ts===1?'Tentative':'None'}; });
+  const nKF = kfs.length, nR = kfs.filter(x=>x.cls==='Robust').length, nS = kfs.filter(x=>x.cls==='Supported').length, nT = kfs.filter(x=>x.cls==='Tentative').length;
+  const ri = nKF ? (nR + 0.5*nS)/nKF : null;
+  const loso = {}; let losoMin = null;
+  FAM.forEach(f => { if(!nKF) return; const keep = kfs.filter(x => x.families.filter(g=>g!==f).length>=2).length/nKF; loso[f]=keep; losoMin = losoMin==null? keep : Math.min(losoMin, keep); });
+  const conv = N ? (m.convergence||0)/N : null;
+  const grey = N ? ((m.coreByFamily.F3||0)+(m.coreByFamily.F4||0))/N : 0;
+  const f5 = N ? (m.coreByFamily.F5||0)/N : 0;
+  const maxShare = N ? Math.max(...coreCounts)/N : 0;
+  const authorMax = m.authorMax ?? null;
+  const checks = [
+    ['Core corpus size', `${N}`, `${T.core[0]}–${T.core[1]}`, N>=T.core[0] && N<=T.core[1]],
+    ['Stream families used (k)', `${k}`, `≥ ${Math.min(T.streamsMin,5)}`, k>=Math.min(T.streamsMin,5)],
+    ['Largest family share', `${(maxShare*100).toFixed(0)}%`, '≤ 40%', maxShare<=0.40],
+    ['Grey literature (F3 + F4)', `${(grey*100).toFixed(0)}%`, T.greyReq?'10–30%':'10–30% (optional)', T.greyReq ? (grey>=0.10 && grey<=0.30) : (grey===0 || (grey>=0.10 && grey<=0.30))],
+    ['Emerging & diverse voices (F5)', `${(f5*100).toFixed(0)}%`, `≥ ${(T.f5*100).toFixed(0)}%`, f5>=T.f5],
+    ['Clusters covered (≥ '+T.covMin+' items)', nClusters?`${covered} / ${nClusters}`:'—', 'all', nClusters? covered===nClusters : null],
+    ['Method families represented', mTot?`${mFam}`:'—', '≥ 3', mTot? mFam>=3 : null],
+    ['Max items per lead author/group', authorMax==null?'—':`${authorMax}`, '≤ 3', authorMax==null? null : authorMax<=3],
+  ];
+  return {tier:tierName,T,N,k,coreCounts,sbi,mdi,mFam,mcounts,covi,nClusters,covered,kfs,nKF,nR,nS,nT,ri,loso,losoMin,conv,grey,f5,maxShare,checks,gates:m.gates||{},harvByFam:m.harvByFam||null,name:m.name||'Your review'};
+}
+
+// ---------- parsers ----------
+function fromSample(s){
+  const items = s.items.map(([id,scores,streams]) => ({id,scores,streams}));
+  const core = s.core.map(([id,method,author]) => ({id,method,author}));
+  const kfs = s.kfs.filter(([id,text,families]) => (text||'').trim() || families.length).map(([id,text,families,ids]) => ({id,text,families,ids}));
+  return fromRecords({name:s.name, tier:s.tier, items, core, clusters:s.clusters, coverage:s.coverage, kfs});
+}
+function fromRecords(r){
+  const coreByFamily = {}; const methodCounts = {}; const authors = {};
+  r.core.forEach(c => { const f = famOf(c.id); if(f) coreByFamily[f]=(coreByFamily[f]||0)+1; if(c.method) methodCounts[c.method]=(methodCounts[c.method]||0)+1; if(c.author){ authors[c.author]=(authors[c.author]||0)+1; } });
+  const coreIds = new Set(r.core.map(c=>c.id));
+  const clusterCounts = r.clusters.map((_,i)=> r.core.filter(c => (r.coverage[c.id]||[]).includes(i)).length);
+  const harvByFam = {}; let pass=0,res=0,exc=0;
+  r.items.forEach(it => { const f = famOf(it.id); if(f) harvByFam[f]=(harvByFam[f]||0)+1; const s = it.scores.map(Number); if (s.some(isNaN)||s.length<6) return; const tot = s.reduce((a,b)=>a+b,0); if (s[0]>=1 && s[1]>=1 && tot>=7) pass++; else if (tot>=5 && tot<=6) res++; else exc++; });
+  const convergence = r.items.filter(it => coreIds.has(it.id) && Number(it.streams)>=2).length;
+  const authorMax = Object.keys(authors).length ? Math.max(...Object.values(authors)) : null;
+  return {name:r.name, tier:r.tier, coreByFamily, methodCounts, clusterCounts, kfs:r.kfs, convergence, authorMax, harvByFam,
+    gates:{harvested:r.items.length, unique:r.items.length, eligible:r.items.length, pass, reserve:res, exclude:exc, core:r.core.length, pool:Math.max(0,pass-r.core.length)}};
+}
+function parseWorkbook(wb){
+  const sheet = name => { const key = wb.SheetNames.find(n => n.toLowerCase().startsWith(name.toLowerCase())); return key ? XLSX.utils.sheet_to_json(wb.Sheets[key], {header:1, defval:null}) : null; };
+  const t4 = sheet('T4'), t6 = sheet('T6'), m4 = sheet('M4'), t15 = sheet('T15'), t1 = sheet('T1');
+  if (!t4 || !t6) throw new Error('Sheets T4 (6R Quality Gate) and T6 (Master Table) were not found. Use the 360° MDL Toolkit v2026 workbook.');
+  const items = t4.slice(4).filter(r => r && r[1]).map(r => ({id:String(r[1]).trim(), scores:r.slice(7,13), streams:r[15]||1}));
+  const core = t6.slice(4).filter(r => r && r[1]).map(r => ({id:String(r[1]).trim(), method:r[12], author:r[7]}));
+  let clusters = [], coverage = {};
+  if (m4){ clusters = (m4[3]||[]).slice(3,13).map(x => x==null?null:String(x)).filter(x=>x && !/^K\d+$/.test(x)); const nC = (m4[3]||[]).slice(3,13).filter(x=>x!=null).length; clusters = (m4[3]||[]).slice(3,3+nC).map(String);
+    m4.slice(4).filter(r=>r&&r[1]).forEach(r => { coverage[String(r[1]).trim()] = clusters.map((_,i)=>i).filter(i => String(r[3+i]||'').trim().toLowerCase()==='x'); }); }
+  const kfs = t15 ? t15.slice(4).filter(r => r && r[0] && /^KF/i.test(String(r[0])) && (String(r[1]||'').trim() || FAM.some((f,i)=>String(r[3+i]||'').trim().toLowerCase()==='x'))).map(r => ({id:String(r[0]), text:r[1]||'', families:FAM.filter((f,i)=>String(r[3+i]||'').trim().toLowerCase()==='x'), ids:r[8]||''})) : [];
+  let tier = 'Standard'; if (t1){ const row = t1.find(r => r && /^tier/i.test(String(r[0]||''))); if (row && row[1]) tier = String(row[1]).trim(); }
+  if (!['Lite','Standard','Advanced'].includes(tier)) tier = 'Standard';
+  let name = 'Uploaded toolkit'; if (t1){ const row = t1.find(r => r && /^review title/i.test(String(r[0]||''))); if (row && row[1]) name = String(row[1]); }
+  if (!items.length || !core.length) throw new Error('No items found in T4 or T6. Fill the ID column (e.g. SCO-IMP-01) in both sheets.');
+  return fromRecords({name, tier, items, core, clusters, coverage, kfs});
+}
+
+// ---------- rendering ----------
+function tile(k, v, t, state){ return `<div class="tile ${state}"><div class="k">${k}</div><div class="v">${v}</div><div class="t">${t}<span class="pill ${state}">${state==='pass'?'PASS':state==='check'?'CHECK':'REPORT'}</span></div></div>`; }
+function st(v, target, dir='ge'){ if (v==null||target==null) return 'report'; return (dir==='ge'? v>=target-1e-9 : v<=target+1e-9) ? 'pass':'check'; }
+function render(){
+  const R = RESULT; const T = R.T;
+  $('dsTitle').textContent = R.name; $('dsSub').textContent = `Tier ${R.tier} · core corpus N = ${R.N} · ${R.k} stream families · ${R.nKF} key findings`;
+  $('tiles').innerHTML = [
+    tile('Stream Balance Index (SBI)', fmt(R.sbi), `target ≥ ${T.sbi.toFixed(2)}`, st(R.sbi,T.sbi)),
+    tile('Coverage Index (CovI)', fmt(R.covi), `target ≥ ${T.covi.toFixed(2)}`, st(R.covi,T.covi)),
+    tile('Method Diversity Index (MDI)', fmt(R.mdi), `target ≥ ${T.mdi.toFixed(2)}`, st(R.mdi,T.mdi)),
+    tile('Resilience Index (RI)', fmt(R.ri), `target ≥ ${T.ri.toFixed(2)} · ${R.nR} R / ${R.nS} S / ${R.nT} T`, st(R.ri,T.ri)),
+    tile('Leave-One-Stream-Out (LOSO)', fmt(R.losoMin), T.loso? `target ≥ ${T.loso.toFixed(2)} (worst case)` : 'reported (required at Advanced)', T.loso? st(R.losoMin,T.loso):'report'),
+    tile('Convergence Rate', R.conv==null?'—':(R.conv*100).toFixed(0)+'%', 'core items found in ≥ 2 streams', 'report'),
+  ].join('');
+  $('ccd').innerHTML = '<thead><tr><th>Rule</th><th>Value</th><th>Requirement</th><th>Status</th></tr></thead><tbody>' + R.checks.map(([a,b,c,ok]) => `<tr><td>${a}</td><td class="num">${b}</td><td>${c}</td><td>${ok==null?'<span class="pill report">n/a</span>':ok?'<span class="pill pass">PASS</span>':'<span class="pill fail">JUSTIFY</span>'}</td></tr>`).join('') + '</tbody>';
+  renderFlow(); renderTri(); renderChecklist(); renderReport(); renderFigures();
+}
+const LIVE = {muted:'var(--muted)',surface:'var(--surface)',line:'var(--line)',fg:'var(--fg)',bg:'var(--bg)',soft:'var(--accent-soft)',f:{F1:'var(--f1)',F2:'var(--f2)',F3:'var(--f3)',F4:'var(--f4)',F5:'var(--f5)'}};
+const PRINT = {muted:'#5E6B7C',surface:'#FFFFFF',line:'#C9D1DA',fg:'#17202E',bg:'#F3F5F7',soft:'#E2F1F3',f:{F1:'#1F4E79',F2:'#7B3F99',F3:'#E09F3E',F4:'#2A9D8F',F5:'#C8553D'}};
+function renderFlow(){ $('flow').innerHTML = flowSVG(LIVE, 'width="100%" style="max-width:760px;display:block"'); }
+function flowSVG(C, attrs){
+  const R = RESULT, g = R.gates; const W = 760, H = 470; const FAMCOL = C.f;
+  const famBoxes = FAM.map((f,i) => { const x = 20 + i*148; const n = R.harvByFam ? (R.harvByFam[f]||0) : null; return `<rect x="${x}" y="30" width="136" height="54" rx="6" fill="${FAMCOL[f]}"/><text x="${x+68}" y="52" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">${f} · ${FAMNAME[f].split(' ')[0]}</text><text x="${x+68}" y="72" text-anchor="middle" font-size="13" fill="#fff" font-family="IBM Plex Mono, monospace">n = ${n==null?'—':n}</text><line x1="${x+68}" y1="84" x2="${x+68}" y2="104" stroke="${C.muted}"/>`; }).join('');
+  const box = (x,y,w,h,title,val,fill) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6" fill="${fill||C.surface}" stroke="${C.line}"/><text x="${x+12}" y="${y+22}" font-size="12.5" font-weight="600" fill="${C.fg}">${title}</text><text x="${x+w-12}" y="${y+22}" text-anchor="end" font-size="13" fill="${C.fg}" font-family="IBM Plex Mono, monospace">${val}</text>`;
+  const arrow = (x1,y1,x2,y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${C.muted}" marker-end="url(#ah)"/>`;
+  const side = (x,y,w,title,val) => `<rect x="${x}" y="${y}" width="${w}" height="34" rx="6" fill="${C.bg}" stroke="${C.line}"/><text x="${x+10}" y="${y+22}" font-size="12" fill="${C.muted}">${title}</text><text x="${x+w-10}" y="${y+22}" text-anchor="end" font-size="12.5" fill="${C.fg}" font-family="IBM Plex Mono, monospace">${val}</text>`;
+  const v = x => x==null?'—':x;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" ${attrs} role="img" aria-label="360° MDL flow diagram"><rect width="${W}" height="${H}" fill="${C.surface}"/><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${C.muted}"/></marker></defs>
+  <text x="20" y="18" font-size="11" font-weight="700" letter-spacing="1.5" fill="${C.muted}">IDENTIFICATION · STREAM FAMILIES</text>${famBoxes}
+  <line x1="88" y1="104" x2="672" y2="104" stroke="${C.muted}"/>${arrow(380,104,380,120)}
+  ${box(220,122,320,36,'Records harvested (all streams)',v(g.harvested))}${arrow(380,158,380,176)}
+  ${box(220,178,320,36,'Unique records after de-duplication',v(g.unique))}${side(560,178,180,'Cross-stream duplicates',g.harvested!=null&&g.unique!=null?g.harvested-g.unique:'—')}${arrow(380,214,380,232)}
+  <text x="20" y="252" font-size="11" font-weight="700" letter-spacing="1.5" fill="${C.muted}">SELECTION · THREE GATES</text>
+  ${box(220,258,320,36,'Gate 1 · Eligible',v(g.eligible))}${side(560,258,180,'Not eligible',g.unique!=null&&g.eligible!=null?g.unique-g.eligible:'—')}${arrow(380,294,380,312)}
+  ${box(220,314,320,36,'Gate 2 · 6R pass',v(g.pass))}${side(560,314,180,'Reserve · Exclude',`${v(g.reserve)} · ${v(g.exclude)}`)}${arrow(380,350,380,368)}
+  ${box(220,370,320,40,'Gate 3 · Core corpus (CCD)',v(g.core),C.soft)}${side(560,372,180,'Extended Evidence Pool',v(g.pool))}
+  <text x="20" y="440" font-size="11" font-weight="700" letter-spacing="1.5" fill="${C.muted}">CORE BY FAMILY</text>${FAM.map((f,i)=>`<rect x="${150+i*80}" y="428" width="14" height="14" rx="3" fill="${FAMCOL[f]}"/><text x="${170+i*80}" y="440" font-size="12.5" fill="${C.fg}" font-family="IBM Plex Mono, monospace">${f} ${R.coreCounts[i]}</text>`).join('')}
+  </svg>`;
+}
+function renderTri(){
+  const R = RESULT;
+  const rows = R.kfs.map(k => `<tr><td class="mono">${k.id}</td><td>${k.text||''}</td><td>${FAM.map(f=>`<span class="chip ${k.families.includes(f)?'':'off'}" style="background:${FAMCOL[f]}">${f}</span>`).join('')}</td><td class="num">${k.ts}</td><td><span class="pill ${k.cls==='Robust'?'pass':k.cls==='Supported'?'report':'check'}">${k.cls}</span></td></tr>`).join('');
+  const loso = FAM.map(f => `<td class="num">${R.loso[f]==null?'—':fmt(R.loso[f])}</td>`).join('');
+  $('tri').innerHTML = `<thead><tr><th>KF</th><th>Key finding</th><th>Supporting families</th><th>TS</th><th>Class</th></tr></thead><tbody>${rows || '<tr><td colspan="5" class="muted">No key findings yet. Fill sheet T15 or add findings manually.</td></tr>'}</tbody><tfoot><tr><th colspan="2">LOSO: share of findings keeping TS ≥ 2 without each family</th><th colspan="3"></th></tr><tr><td colspan="2" class="muted">worst case = ${fmt(R.losoMin)}</td><td colspan="3"><table style="width:auto"><tr>${FAM.map(f=>`<th>${f}</th>`).join('')}</tr><tr>${loso}</tr></table></td></tr></tfoot>`;
+}
+function autoStatus(n){
+  const R = RESULT, T = R.T;
+  switch(n){
+    case 8: return R.k>=3 ? 'ok':'warn';
+    case 15: return R.gates.core!=null ? 'ok':null;
+    case 20: return R.covi!=null ? (R.covi>=T.covi?'ok':'warn') : null;
+    case 21: return R.mdi!=null ? (R.mdi>=T.mdi?'ok':'warn') : null;
+    case 22: return R.nKF ? 'ok':'warn';
+    case 23: return R.ri!=null ? (R.ri>=T.ri?'ok':'warn') : null;
+    case 14: return R.checks.every(c=>c[3]!==false) ? 'ok':'warn';
+    default: return null;
+  }
+}
+function renderChecklist(){
+  let done = 0;
+  $('checklist').innerHTML = RC.map(([sec,n,item]) => { const a = autoStatus(n); const checked = a==='ok' || !!ticks[n]; if (checked) done++;
+    const auto = a==='ok' ? '<span class="pill pass">computed</span>' : a==='warn' ? '<span class="pill check">below target</span>' : '';
+    return `<div class="cl"><span class="n">${n}</span><input type="checkbox" data-rc="${n}" ${checked?'checked':''} ${a==='ok'?'disabled':''} aria-label="Item ${n}"><span><strong>${sec}.</strong> ${item}</span><span>${auto}</span></div>`; }).join('');
+  $('rcScore').textContent = `${done} / 30 reported`;
+  $('checklist').querySelectorAll('input[data-rc]').forEach(cb => cb.addEventListener('change', e => { ticks[e.target.dataset.rc] = e.target.checked; renderChecklist(); renderReport(); }));
+}
+function reportText(){
+  const R = RESULT, T = R.T;
+  const L = [];
+  L.push(`360° MDL INDEX REPORT — ${R.name}`); L.push(`Generated ${new Date().toISOString().slice(0,10)} with the 360° MDL Index Calculator beta 1 · Tier ${R.tier}`); L.push('');
+  L.push(`Core corpus N = ${R.N} (${FAM.map((f,i)=>`${f} ${R.coreCounts[i]}`).join(', ')}); stream families k = ${R.k}`);
+  L.push(`SBI = ${fmt(R.sbi)} (target ≥ ${T.sbi}) · CovI = ${fmt(R.covi)} (target ≥ ${T.covi}; ${R.covered}/${R.nClusters} clusters) · MDI = ${fmt(R.mdi)} (target ≥ ${T.mdi}; ${R.mFam} method families)`);
+  L.push(`Key findings: ${R.nKF} (${R.nR} Robust, ${R.nS} Supported, ${R.nT} Tentative) · RI = ${fmt(R.ri)} (target ≥ ${T.ri}) · LOSO worst case = ${fmt(R.losoMin)} (${FAM.map(f=>`without ${f}: ${fmt(R.loso[f])}`).join('; ')})`);
+  L.push(`Convergence Rate = ${R.conv==null?'—':(R.conv*100).toFixed(0)+'%'} · grey literature (F3+F4) = ${(R.grey*100).toFixed(0)}% · F5 = ${(R.f5*100).toFixed(0)}%`);
+  L.push(''); L.push('CCD portfolio checks:'); R.checks.forEach(([a,b,c,ok]) => L.push(`  ${ok==null?'n/a ':ok?'PASS':'JUSTIFY'}  ${a}: ${b} (requirement ${c})`));
+  const g = R.gates; L.push(''); L.push(`Flow: harvested ${g.harvested??'—'} → unique ${g.unique??'—'} → eligible ${g.eligible??'—'} → Gate 2 pass ${g.pass??'—'} / reserve ${g.reserve??'—'} / exclude ${g.exclude??'—'} → core ${g.core??'—'} (Extended Evidence Pool ${g.pool??'—'})`);
+  L.push(''); L.push('Triangulation (T15):'); R.kfs.forEach(k => L.push(`  ${k.id}  TS ${k.ts} ${k.cls}  [${k.families.join(', ')}]  ${k.text||''}`));
+  const done = RC.filter(([,n]) => autoStatus(n)==='ok' || ticks[n]).length; L.push(''); L.push(`MDL-RC 2026: ${done}/30 items reported. Open items: ${RC.filter(([,n]) => !(autoStatus(n)==='ok' || ticks[n])).map(x=>x[1]).join(', ') || 'none'}`);
+  return L.join('\n');
+}
+function sentence(){ const R = RESULT; return `This review was conducted and reported according to the 360° MDL methodology, Version 2026 (Lytras, 2026), at the ${R.tier} tier, with ${R.k} stream families and a core corpus of ${R.N} items. Stream Balance Index ${fmt(R.sbi)}, Coverage Index ${fmt(R.covi)}, Method Diversity Index ${fmt(R.mdi)}; ${R.nR} of ${R.nKF} key findings were Robust (Resilience Index ${fmt(R.ri)}; Leave-One-Stream-Out worst case ${fmt(R.losoMin)}).`; }
+function renderReport(){ $('sentence').textContent = sentence(); $('report').textContent = reportText(); }
+function copy(text, msg){ const done = () => { $('copyMsg').textContent = msg; setTimeout(()=>$('copyMsg').textContent='', 2500); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done).catch(() => { const r = document.createRange(); r.selectNodeContents($('report')); const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); $('copyMsg').textContent = 'Select and copy the text below.'; });
+  else { $('copyMsg').textContent = 'Select and copy the text below.'; } }
+
+// ---------- manual form ----------
+function buildManual(){
+  $('methodInputs').innerHTML = METHODS.map((m,i)=>`<input id="m${i}" type="number" min="0" value="${[20,8,4,3,5,4,2,1,1][i]}" title="${m}" placeholder="${m}">`).join('');
+  for (let i=0;i<8;i++) addKFRow(i<6 ? ['F1','F2','F3','F5'].slice(0, (i%4)+1 + (i===0?0:0)) : ['F1']);
+}
+function addKFRow(fams=['F1']){
+  const n = $('kfManual').children.length + 1;
+  const div = document.createElement('div'); div.className = 'kfrow';
+  div.innerHTML = `<input type="text" placeholder="KF${n}: short statement" aria-label="Key finding ${n}"><div class="famchecks">${FAM.map(f=>`<label style="background:${FAMCOL[f]}"><input type="checkbox" value="${f}" ${fams.includes(f)?'checked':''}><span>${f}</span></label>`).join('')}</div><button class="btn small" title="Remove" aria-label="Remove finding">×</button>`;
+  div.querySelector('button').addEventListener('click', () => div.remove());
+  $('kfManual').appendChild(div);
+}
+function readManual(){
+  const coreByFamily = {}; FAM.forEach((f,i) => coreByFamily[f] = Number($('c'+(i+1)).value)||0);
+  const methodCounts = {}; METHODS.forEach((m,i) => { const v = Number($('m'+i).value)||0; if (v) methodCounts[m]=v; });
+  const kfs = [...$('kfManual').children].map((row,i) => ({id:'KF'+(i+1), text:row.querySelector('input[type=text]').value, families:[...row.querySelectorAll('input[type=checkbox]:checked')].map(c=>c.value)}));
+  const N = Object.values(coreByFamily).reduce((a,b)=>a+b,0);
+  return {name:'Manual entry', tier:$('mTier').value, coreByFamily, methodCounts, nClusters:Number($('mClusters').value)||0, covered:Number($('mCovered').value)||0, kfs, convergence:Number($('mConv').value)||0, authorMax:null, harvByFam:null,
+    gates:{harvested:Number($('gHarv').value), unique:Number($('gUniq').value), eligible:Number($('gElig').value), pass:Number($('gPass').value), reserve:Number($('gRes').value), exclude:Number($('gExc').value), core:N, pool:Math.max(0,Number($('gPass').value)-N)}};
+}
+function run(model){ DATA = model; if (model.tier) $('tier').value = model.tier; RESULT = compute(DATA, $('tier').value); render(); }
+function showStatus(msg, err){ const s = $('status'); s.hidden = false; s.textContent = msg; s.className = 'status' + (err?' err':''); }
+
+// ---------- wiring ----------
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => { document.querySelectorAll('.tabs button').forEach(x => x.setAttribute('aria-selected', x===b)); $('tab-upload').hidden = b.dataset.tab!=='upload'; $('tab-manual').hidden = b.dataset.tab!=='manual'; }));
+$('tier').addEventListener('change', () => { if (DATA){ RESULT = compute(DATA, $('tier').value); render(); } });
+$('loadSample').addEventListener('click', () => { run(fromSample(SAMPLE)); showStatus('Loaded the illustrative Smart Cities example from the toolkit. Figures are synthetic and for demonstration only.'); });
+function handleFile(file){ if (!file) return; const rd = new FileReader(); rd.onload = e => { try { const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'}); run(parseWorkbook(wb)); showStatus(`Read “${file.name}”: ${DATA.gates.unique} screened items, ${DATA.gates.core} core items, ${DATA.kfs.length} key findings.`); } catch(err){ showStatus('Could not read this file. ' + err.message, true); } }; rd.readAsArrayBuffer(file); }
+$('file').addEventListener('change', e => handleFile(e.target.files[0]));
+const drop = $('drop'); ['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); })); ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); })); drop.addEventListener('drop', e => handleFile(e.dataTransfer.files[0]));
+$('addKF').addEventListener('click', () => addKFRow());
+$('computeManual').addEventListener('click', () => { run(readManual()); });
+$('copySentence').addEventListener('click', () => copy(sentence(), 'Methods sentence copied.'));
+$('copyReport').addEventListener('click', () => copy(reportText(), 'Report copied.'));
+$('copyJSON').addEventListener('click', () => copy(JSON.stringify({generated:new Date().toISOString(), tool:'360° MDL Index Calculator beta 1', result:{name:RESULT.name,tier:RESULT.tier,N:RESULT.N,coreByFamily:Object.fromEntries(FAM.map((f,i)=>[f,RESULT.coreCounts[i]])),SBI:RESULT.sbi,CovI:RESULT.covi,MDI:RESULT.mdi,RI:RESULT.ri,LOSO:RESULT.loso,LOSO_min:RESULT.losoMin,convergence:RESULT.conv,kfs:RESULT.kfs.map(k=>({id:k.id,TS:k.ts,class:k.cls,families:k.families})),checks:RESULT.checks,gates:RESULT.gates}}, null, 2), 'JSON copied.'));
+
+// ---------- Publication figures (PNG, 2x) ----------
+const PF = {bg:'#FFFFFF',fg:'#17202E',muted:'#5E6B7C',line:'#C9D1DA',grid:'#E6EAEF',accent:'#0F7C8C',soft:'#E2F1F3',good:'#1C7A5F',amber:'#B9782A',coral:'#B8452F',f:PRINT.f};
+const SANS = '"IBM Plex Sans", "Helvetica Neue", Arial, sans-serif', MONO = '"IBM Plex Mono", Menlo, Consolas, monospace';
+function canvas(w, h){ const c = document.createElement('canvas'); const S = 2; c.width = w*S; c.height = h*S; const x = c.getContext('2d'); x.scale(S,S); x.fillStyle = PF.bg; x.fillRect(0,0,w,h); x.textBaseline = 'middle'; return [c,x]; }
+function txt(x, s, px, py, o={}){ x.font = `${o.w||400} ${o.s||12}px ${o.mono?MONO:SANS}`; x.fillStyle = o.c||PF.fg; x.textAlign = o.a||'left'; x.fillText(s, px, py); }
+function title(x, s, w){ txt(x, s, 16, 16, {w:700, s:13}); x.strokeStyle = PF.line; x.beginPath(); x.moveTo(16,30); x.lineTo(w-16,30); x.stroke(); }
+function barChart(x, items, box, o={}){ // items: [{label, value, color, note}] ; box {x,y,w,h}; o.max, o.target
+  const {x:bx,y:by,w:bw,h:bh} = box; const max = o.max||1; const n = items.length; const gap = 14; const bwid = (bw - gap*(n+1))/n;
+  const y0 = by + bh - 34; const yv = v => y0 - (v/max)*(bh-50);
+  for (let t=0;t<=4;t++){ const v = max*t/4; x.strokeStyle = PF.grid; x.beginPath(); x.moveTo(bx,yv(v)); x.lineTo(bx+bw,yv(v)); x.stroke(); txt(x, o.pct? Math.round(v*100)+'%' : v.toFixed(2), bx-6, yv(v), {s:10,c:PF.muted,a:'right',mono:true}); }
+  items.forEach((it,i) => { const px = bx + gap + i*(bwid+gap); x.fillStyle = it.color||PF.accent; const h = Math.max(0,(it.value/max)*(bh-50)); x.fillRect(px, y0-h, bwid, h); txt(x, it.label, px+bwid/2, y0+12, {s:10.5,a:'center'}); if (it.note) txt(x, it.note, px+bwid/2, y0+25, {s:9.5,a:'center',c:PF.muted}); txt(x, o.pct? Math.round(it.value*100)+'%' : it.value.toFixed(2), px+bwid/2, y0-h-9, {s:10.5,a:'center',mono:true,w:500});
+    if (it.target!=null){ x.strokeStyle = PF.coral; x.setLineDash([4,3]); x.beginPath(); x.moveTo(px-4, yv(it.target)); x.lineTo(px+bwid+4, yv(it.target)); x.stroke(); x.setLineDash([]); } });
+  x.strokeStyle = PF.line; x.beginPath(); x.moveTo(bx,y0); x.lineTo(bx+bw,y0); x.stroke();
+}
+function table(x, cols, rows, box, o={}){ // cols: [{h, w, a}] ; rows: [[cell...]] cell = string | {t, c, mono, fill, w}
+  let py = box.y; const rowH = o.rowH||22; let px = box.x;
+  x.fillStyle = PF.soft; x.fillRect(box.x, py, cols.reduce((a,c)=>a+c.w,0), rowH);
+  cols.forEach(c => { txt(x, c.h, px + (c.a==='right'? c.w-6 : c.a==='center'? c.w/2 : 6), py+rowH/2, {s:10,w:700,a:c.a||'left',c:PF.fg}); px += c.w; });
+  py += rowH;
+  rows.forEach((r,ri) => { px = box.x; if (ri%2) { x.fillStyle = '#F7F9FB'; x.fillRect(box.x, py, cols.reduce((a,c)=>a+c.w,0), rowH); }
+    r.forEach((cell,ci) => { const c = cols[ci]; const o2 = typeof cell==='object' ? cell : {t:cell}; if (o2.fill){ x.fillStyle = o2.fill; x.fillRect(px+3, py+4, c.w-6, rowH-8); }
+      txt(x, String(o2.t??''), px + (c.a==='right'? c.w-6 : c.a==='center'? c.w/2 : 6), py+rowH/2, {s:10.5,a:c.a||'left',c:o2.c||PF.fg,mono:o2.mono,w:o2.w||400}); px += c.w; });
+    py += rowH; x.strokeStyle = PF.grid; x.beginPath(); x.moveTo(box.x,py); x.lineTo(box.x+cols.reduce((a,c)=>a+c.w,0),py); x.stroke(); });
+  return py;
+}
+function foot(x, s, w, h){ txt(x, s, 16, h-12, {s:9,c:PF.muted}); txt(x, '360° MDL v2026 · Index Calculator beta 1', w-16, h-12, {s:9,c:PF.muted,a:'right'}); }
+function wrapText(x, s, maxW, font){ x.font = font; const words = String(s).split(' '); const lines=[]; let cur=''; words.forEach(w => { const t = cur? cur+' '+w : w; if (x.measureText(t).width > maxW && cur){ lines.push(cur); cur = w; } else cur = t; }); if (cur) lines.push(cur); return lines; }
+
+function buildFigures(){
+  const R = RESULT, T = R.T, figs = [];
+  // F1 Flow diagram (from SVG)
+  figs.push({id:'flow', name:'Figure_1_flow_diagram', cap:'Figure 1. 360° MDL flow diagram (PRISMA 2020-compatible): records per stream family and per gate.', svg: flowSVG(PRINT, 'width="760" height="470"'), w:760, h:470});
+  // F2 Core corpus composition
+  { const [c,x] = canvas(640, 330); title(x, `Core corpus composition by stream family (N = ${R.N})`, 640);
+    const SHORT={F1:'Academic',F2:'Influencers',F3:'Industry',F4:'Policy',F5:'Emerging voices'};
+    barChart(x, FAM.map((f,i)=>({label:f, note:SHORT[f], value:R.N? R.coreCounts[i]/R.N:0, color:PF.f[f], target: f==='F5'? T.f5 : 0.40})), {x:50,y:44,w:570,h:240}, {max:0.5,pct:true});
+    foot(x, 'Dashed lines: ≤ 40% per family; F5 ≥ '+Math.round(T.f5*100)+'% (CCD portfolio rules). Counts: '+FAM.map((f,i)=>f+' '+R.coreCounts[i]).join(' · '), 640, 330);
+    figs.push({id:'comp', name:'Figure_2_core_composition', cap:'Figure 2. Core corpus composition by stream family, with the CCD portfolio limits.', c}); }
+  // F3 Index profile
+  { const [c,x] = canvas(640, 330); title(x, `Index profile against ${R.tier}-tier targets`, 640);
+    const it = [['SBI',R.sbi,T.sbi],['CovI',R.covi,T.covi],['MDI',R.mdi,T.mdi],['RI',R.ri,T.ri],['LOSO',R.losoMin,T.loso||0.70]].map(([l,v,t]) => ({label:l, value:v==null?0:v, target:t, color: v==null? PF.line : v>=t-1e-9 ? PF.accent : PF.amber}));
+    barChart(x, it, {x:50,y:44,w:570,h:240}, {max:1});
+    foot(x, 'Dashed lines: targets (LOSO required at the Advanced tier). Teal = at or above target; amber = below target.', 640, 330);
+    figs.push({id:'idx', name:'Figure_3_index_profile', cap:'Figure 3. 360° MDL indices of the review against the tier targets.', c}); }
+  // F4 Triangulation matrix
+  { const rows = R.kfs; const h = 70 + 22*(rows.length+1) + 30; const [c,x] = canvas(760, h); title(x, 'Triangulation matrix: stream families supporting each key finding', 760);
+    const cols = [{h:'KF',w:44},{h:'Key finding',w:356},...FAM.map(f=>({h:f,w:40,a:'center'})),{h:'TS',w:40,a:'center'},{h:'Class',w:80}];
+    const data = rows.map(k => [k.id, {t:(k.text||'').slice(0,62)+((k.text||'').length>62?'…':'')}, ...FAM.map(f => k.families.includes(f)? {t:'●', c:PF.f[f], w:700} : {t:'·', c:PF.line}), {t:String(k.ts), mono:true}, {t:k.cls, c: k.cls==='Robust'?PF.good:k.cls==='Supported'?PF.accent:PF.amber, w:600}]);
+    table(x, cols, data, {x:16,y:42,w:728});
+    foot(x, `Robust TS ≥ 3 · Supported TS = 2 · Tentative TS = 1. RI = ${fmt(R.ri)} (${R.nR} R / ${R.nS} S / ${R.nT} T).`, 760, h);
+    figs.push({id:'tri', name:'Figure_4_triangulation_matrix', cap:'Figure 4. Triangulation matrix of key findings by stream family, with Triangulation Strength (TS) and class.', c}); }
+  // F5 LOSO
+  { const [c,x] = canvas(640, 330); title(x, 'Leave-One-Stream-Out: share of findings keeping TS ≥ 2 without each family', 640);
+    barChart(x, FAM.map(f => ({label:'without '+f, value:R.loso[f]||0, color:PF.f[f], target: T.loso||0.70})), {x:50,y:44,w:570,h:240}, {max:1});
+    foot(x, `Worst case LOSO = ${fmt(R.losoMin)}. Dashed line: 0.70 target (Advanced tier).`, 640, 330);
+    figs.push({id:'loso', name:'Figure_5_LOSO', cap:'Figure 5. Leave-One-Stream-Out stability of the key findings.', c}); }
+  // F6 Method diversity
+  { const [c,x] = canvas(640, 330); title(x, `Method family distribution of the core corpus (MDI = ${fmt(R.mdi)})`, 640);
+    const tot = R.mcounts.reduce((a,b)=>a+b,0)||1; const short = ['Quant.','Qual.','Mixed','Design sci.','Concept.','Review','Simul.','Case','Delphi'];
+    barChart(x, METHODS.map((m,i) => ({label:short[i], value:R.mcounts[i]/tot, color:PF.accent})), {x:50,y:44,w:570,h:240}, {max:Math.max(0.5, Math.ceil(Math.max(...R.mcounts)/tot*10)/10), pct:true});
+    foot(x, 'Nine method families of matrix M2. MDI = normalised Shannon entropy (target ≥ 0.60).', 640, 330);
+    figs.push({id:'mdi', name:'Figure_6_method_diversity', cap:'Figure 6. Distribution of method families in the core corpus (matrix M2).', c}); }
+  // T1 Stream analysis table
+  { const [c,x] = canvas(700, 250); title(x, 'Table 1. Stream analysis: harvest, core corpus and share by stream family', 700);
+    const cols = [{h:'Family',w:60},{h:'Stream family',w:230},{h:'Harvested',w:90,a:'right'},{h:'Core items',w:90,a:'right'},{h:'Share of core',w:100,a:'right'},{h:'Rule',w:98}];
+    const rows = FAM.map((f,i) => [{t:f,c:PF.f[f],w:700}, FAMNAME[f], {t:R.harvByFam? String(R.harvByFam[f]||0):'—',mono:true}, {t:String(R.coreCounts[i]),mono:true}, {t:R.N? Math.round(R.coreCounts[i]/R.N*100)+'%':'—',mono:true}, f==='F5'? `≥ ${Math.round(T.f5*100)}%` : f==='F3'||f==='F4'? 'F3+F4 10–30%' : '≤ 40%']);
+    rows.push([{t:'Total',w:700},'', {t:R.harvByFam? String(Object.values(R.harvByFam).reduce((a,b)=>a+b,0)):'—',mono:true}, {t:String(R.N),mono:true,w:700}, {t:'100%',mono:true}, `SBI = ${fmt(R.sbi)}`]);
+    table(x, cols, rows, {x:16,y:42,w:668}); foot(x, `Grey literature (F3+F4) = ${Math.round(R.grey*100)}% · F5 = ${Math.round(R.f5*100)}% · Convergence Rate = ${R.conv==null?'—':Math.round(R.conv*100)+'%'}`, 700, 250);
+    figs.push({id:'t1', name:'Table_1_stream_analysis', cap:'Table 1. Stream analysis of the review by stream family.', c, tsv: ['Family\tStream family\tHarvested\tCore items\tShare of core', ...FAM.map((f,i)=>`${f}\t${FAMNAME[f]}\t${R.harvByFam?(R.harvByFam[f]||0):''}\t${R.coreCounts[i]}\t${R.N?Math.round(R.coreCounts[i]/R.N*100)+'%':''}`)].join('\n')}); }
+  // T2 Indices table
+  { const [c,x] = canvas(700, 250); title(x, 'Table 2. 360° MDL indices and portfolio checks', 700);
+    const cols = [{h:'Index',w:250},{h:'Value',w:90,a:'right'},{h:'Target',w:110,a:'right'},{h:'Status',w:100},{h:'Definition',w:134}];
+    const rows = [['Stream Balance Index (SBI)',R.sbi,`≥ ${T.sbi}`,'H / ln k'],['Coverage Index (CovI)',R.covi,`≥ ${T.covi}`,`clusters ≥ ${T.covMin} / all`],['Method Diversity Index (MDI)',R.mdi,`≥ ${T.mdi}`,'H / ln 9'],['Resilience Index (RI)',R.ri,`≥ ${T.ri}`,'(R + 0.5 S) / KF'],['LOSO (worst case)',R.losoMin,T.loso?`≥ ${T.loso}`:'report','min share TS ≥ 2'],['Convergence Rate',R.conv,'report','items in ≥ 2 streams']].map(([n,v,t,d]) => { const ok = t.startsWith('≥') ? (v!=null && v>=parseFloat(t.slice(2))-1e-9) : null; return [n,{t:fmt(v),mono:true},t,{t:ok==null?'reported':ok?'PASS':'below',c:ok==null?PF.muted:ok?PF.good:PF.amber,w:600},d]; });
+    table(x, cols, rows, {x:16,y:42,w:684}); foot(x, `Tier ${R.tier} · N = ${R.N} · k = ${R.k} families · ${R.nKF} key findings`, 700, 250);
+    figs.push({id:'t2', name:'Table_2_indices', cap:'Table 2. Indices of the review against the tier targets.', c, tsv: ['Index\tValue\tTarget', ...rows.map(r=>`${r[0]}\t${r[1].t}\t${r[2]}`)].join('\n')}); }
+  // T3 CCD checks table
+  { const h = 70 + 22*(R.checks.length+1) + 20; const [c,x] = canvas(700, h); title(x, 'Table 3. CCD portfolio checks (Gate 3)', 700);
+    const cols = [{h:'Rule',w:300},{h:'Value',w:110,a:'right'},{h:'Requirement',w:170},{h:'Status',w:104}];
+    table(x, cols, R.checks.map(([a,b,cc,ok]) => [a,{t:b,mono:true},cc,{t:ok==null?'n/a':ok?'PASS':'JUSTIFY',c:ok==null?PF.muted:ok?PF.good:PF.coral,w:600}]), {x:16,y:42,w:684});
+    foot(x, 'A rule marked JUSTIFY needs a written justification in the review (MDL-RC item 14).', 700, h);
+    figs.push({id:'t3', name:'Table_3_CCD_checks', cap:'Table 3. Portfolio checks of the core corpus.', c, tsv: ['Rule\tValue\tRequirement\tStatus', ...R.checks.map(([a,b,cc,ok])=>`${a}\t${b}\t${cc}\t${ok==null?'n/a':ok?'PASS':'JUSTIFY'}`)].join('\n')}); }
+  return figs;
+}
+function svgToPng(svg, w, h){ return new Promise(res => { const img = new Image(); const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); img.onload = () => { const [c,x] = canvas(w,h); x.drawImage(img,0,0,w,h); res(c.toDataURL('image/png')); }; img.onerror = () => res(null); img.src = url; }); }
+async function renderFigures(){
+  const host = $('figures'); if (!host) return; host.innerHTML = '';
+  const figs = buildFigures();
+  for (const f of figs){
+    let url = f.c ? f.c.toDataURL('image/png') : await svgToPng(f.svg, f.w, f.h);
+    const card = document.createElement('div'); card.className = 'figcard';
+    card.innerHTML = `<img alt="${f.cap}" src="${url||''}"><div class="figcap">${f.cap}</div><div class="row"><button class="btn small" data-dl>Download PNG</button>${f.tsv?`<button class="btn small" data-tsv>Copy table for Word/Excel</button>`:''}<span class="muted dlmsg" style="font-size:.75rem"></span></div>`;
+    card.querySelector('[data-dl]').addEventListener('click', () => saveFile(f.name + '.png', url, card.querySelector('.dlmsg')));
+    if (f.tsv) card.querySelector('[data-tsv]').addEventListener('click', () => copy(f.tsv, 'Table copied (tab-separated). Paste into Word or Excel.'));
+    host.appendChild(card);
+  }
+}
+
+// ---------- saving files: Claude viewer capability, or a plain download elsewhere ----------
+let DL = undefined;
+async function getDownloads(){ if (DL !== undefined) return DL; try { DL = (window.claude && window.claude.use) ? await window.claude.use('downloads') : null; } catch(e){ DL = null; } return DL; }
+async function saveFile(filename, dataUrl, msgEl){
+  if (!dataUrl) return;
+  const blob = await (await fetch(dataUrl)).blob();
+  const dl = await getDownloads();
+  if (dl){ try { await dl.save({filename, data: blob}); msgEl.textContent = 'Saved.'; } catch(e){ msgEl.textContent = e && e.code==='declined' ? 'Download cancelled.' : 'Could not save here. Right-click the image and choose “Save image as…”.'; } }
+  else { const a = document.createElement('a'); a.href = dataUrl; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); msgEl.textContent = 'If nothing happened, right-click the image and choose “Save image as…”.'; }
+  setTimeout(()=>{ msgEl.textContent=''; }, 4000);
+}
+
+buildManual();
+run(fromSample(SAMPLE)); showStatus('Showing the illustrative Smart Cities example (synthetic data). Upload your own toolkit to replace it.');
+
+</script>
+</body></html>
