@@ -108,17 +108,24 @@ footer b{color:#fff}
 </div></nav>
 <header class="hero"><div class="wrap">
   <div>
-    <div class="eyebrow" style="color:#8FD3DC">AI agent · Claude Skill · v0.1.1 beta · MIT / CC BY 4.0</div>
+    <div class="eyebrow" style="color:#8FD3DC">AI agent · Claude Skill · v0.1.2 beta · MIT / CC BY 4.0</div>
     <h1>360° MDL <span>Navigator</span></h1>
     <p class="tag">The agent that runs the 360° MDL method with you: from a topic sentence to a verified Core Knowledge and a Knowledge Distillate, under the Two-Key Rule. You keep every decision; it does the work and keeps the record.</p>
     <div class="btns">
-      <a class="btn primary" href="360mdl-navigator.zip">Download the skill (zip, 340 KB)</a>
+      <a class="btn primary" href="360mdl-navigator.zip">Download the skill (zip, 300 KB)</a>
       <a class="btn ghost" href="https://github.com/mlytras/360mdl">Source on GitHub</a>
-      <a class="btn ghost" href="https://doi.org/10.5281/zenodo.24041176">Zenodo record</a>
+      <a class="btn ghost" href="https://doi.org/10.5281/zenodo.24041175">Zenodo record</a>
     </div>
   </div>
   <img class="logo" src="logo.png" alt="360° MDL logo">
 </div></header>
+
+<section style="background:#fff"><div class="wrap">
+  <div class="eyebrow">What's new · v0.1.2 · 15 November 2026</div>
+  <h2>D4b, the Evidence Landscape Report</h2>
+  <p style="max-width:780px">Every build now writes a short Word report, the companion to the core corpus (D4), that shows <b>who shapes your evidence</b>: the leading authors of your eligible pool (by productivity and by citations) and whether they reach the core; the influencer papers in the core and their role; the most-cited core items and eligible records with their gate status; the rising papers to read in the next iteration; and the emerging and diverse voices by slice, with two figures. It is built only from your own records and their exported citation counts. Ask: <i>"Give me the Evidence Landscape Report (D4b)."</i> Add <code>--anonymous</code> for blind review.</p>
+  <p class="small">Already using v0.1.1? Download the new zip and upload it again in Settings → Customize → Skills (replace the old one). Learn the whole method step by step in the <a href="https://doi.org/10.5281/zenodo.24241346">Student Handbook</a> and the <a href="https://doi.org/10.5281/zenodo.24241357">Claude in Excel guide</a>.</p>
+</div></section>
 
 <section><div class="wrap">
   <div class="eyebrow">Install and start</div>
@@ -131,7 +138,7 @@ I have a Scopus export attached (stream SCO, slice IMP). Help me discover the ot
   <p class="small">From scratch: <i>Use the 360mdl-navigator skill. Start a 360° MDL review on "&lt;your topic&gt;", Standard tier, from scratch.</i></p></div></div>
   <div class="step"><div class="n">4</div><div><h3>Turn the four keys</h3><p>The Navigator stops and waits for you four times: <b>Key 1</b> the Review Canvas · <b>Key 2</b> the 6R scores and the core corpus (PASS and RESERVE items one by one, clear excludes in a batch after a 10 % sample) · <b>Key 3</b> the key findings · <b>Key 4</b> the Knowledge Distillate, dimension by dimension. Answer in plain words: "confirm", "R6 should be 2 because…", "merge dimensions 2 and 5". Nothing is final until you say so.</p></div></div>
   <div class="step"><div class="n">5</div><div><h3>Take your Core Knowledge, then iterate</h3><p>Every build gives you a folder:</p>
-  <p class="files"><code>360MDL_Toolkit_v2026_&lt;topic&gt;_v1.xlsx</code><code>calculator.json</code><code>gaps_report.md</code><code>methods_draft.md</code><code>ai_use_statement.md</code><code>mdlrc_checklist.md</code><code>navigator_run_checklist.md</code><code>distillate/ (Markdown + Word, APA or Harvard)</code><code>audit_log.jsonl</code><code>review_state_v1.json</code></p>
+  <p class="files"><code>360MDL_Toolkit_v2026_&lt;topic&gt;_v1.xlsx</code><code>D4b_Evidence_Landscape_&lt;topic&gt;_v1.docx</code><code>calculator.json</code><code>gaps_report.md</code><code>methods_draft.md</code><code>ai_use_statement.md</code><code>mdlrc_checklist.md</code><code>navigator_run_checklist.md</code><code>distillate/ (Markdown + Word, APA or Harvard)</code><code>audit_log.jsonl</code><code>review_state_v1.json</code></p>
   <p>Open <code>calculator.json</code> or the toolkit in the <a href="calculator.html">Index Calculator</a> for the figures. Read the gaps report with your supervisor, add exports or DOIs, and build again: each version shows the indices before and after.</p></div></div>
 </div></section>
 
@@ -158,7 +165,7 @@ I have a Scopus export attached (stream SCO, slice IMP). Help me discover the ot
   <div class="eyebrow">Citation and licence</div>
   <h2>How to cite the Navigator</h2>
   <div class="cite">
-    <p>Lytras, M. D. (2026). <i>360° MDL Navigator</i> (Version 0.1.1) [Software]. Zenodo. <a href="https://doi.org/10.5281/zenodo.24041176">https://doi.org/10.5281/zenodo.24041176</a></p>
+    <p>Lytras, M. D. (2026). <i>360° MDL Navigator</i> (Version 0.1.2) [Software]. Zenodo. <a href="https://doi.org/10.5281/zenodo.24241965">https://doi.org/10.5281/zenodo.24241965</a></p>
     <p>Lytras, M. D. (2026). <i>360° MDL: The Multidimensional Literature Review Model — Version 2026</i>. Zenodo. <a href="https://doi.org/10.5281/zenodo.23724393">https://doi.org/10.5281/zenodo.23724393</a></p>
   </div>
   <p class="small" style="margin-top:14px">Scripts: MIT licence. Instructions, reference files and templates: CC BY 4.0. 360° MDL is a trademark of the author. Feedback and bug reports: mlytras@acg.edu (subject "360° MDL Navigator").</p>
@@ -166,7 +173,7 @@ I have a Scopus export attached (stream SCO, slice IMP). Help me discover the ot
 
 <footer><div class="wrap">
   <div><b>Miltiadis D. Lytras</b><br>Deree — The American College of Greece · Effat University<br>ORCID <a href="https://orcid.org/0000-0002-7281-5458">0000-0002-7281-5458</a></div>
-  <div><b>360° MDL Navigator</b> · v0.1.1 beta, November 2026<br><a href="index.html">Home</a> · <a href="calculator.html">Calculator</a> · <a href="index.html#resources">Resources</a></div>
+  <div><b>360° MDL Navigator</b> · v0.1.2 beta, November 2026<br><a href="index.html">Home</a> · <a href="calculator.html">Calculator</a> · <a href="index.html#resources">Resources</a></div>
 </div></footer>
 </body>
 </html>
