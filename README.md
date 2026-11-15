@@ -9,6 +9,6 @@ Public site of the **360° MDL — Multidimensional Literature Review Model, Ver
 - `360MDL_Index_Calculator_User_Guide.pdf` — User Guide and Claude protocol (CC BY 4.0)
 
 Permanent, citable copies of every resource are on Zenodo:
-methodology doi:10.5281/zenodo.23724393 · Student Handbook v1.1 doi:10.5281/zenodo.24241346 · Claude in Excel guide doi:10.5281/zenodo.24241357 · Navigator doi:10.5281/zenodo.24041175 (all versions; v0.1.2 doi:10.5281/zenodo.24241965) · PhD Playbook doi:10.5281/zenodo.23777000 (Greek doi:10.5281/zenodo.23807964) · calculator doi:10.5281/zenodo.24033376 · open data doi:10.5281/zenodo.23772941 · community zenodo.org/communities/360mdl
+methodology doi:10.5281/zenodo.23724393 · Starter Kit doi:10.5281/zenodo.24246082 · Origins doi:10.5281/zenodo.24245889 · Student Handbook v1.1 doi:10.5281/zenodo.24241346 · Claude in Excel guide doi:10.5281/zenodo.24241357 · Navigator doi:10.5281/zenodo.24041175 (all versions; v0.1.2 doi:10.5281/zenodo.24241965) · PhD Playbook doi:10.5281/zenodo.23777000 (Greek doi:10.5281/zenodo.23807964) · calculator doi:10.5281/zenodo.24033376 · open data doi:10.5281/zenodo.23772941 · community zenodo.org/communities/360mdl
 
 © 2026 Miltiadis D. Lytras. 360° MDL is a trademark of the author. Page text and guides: CC BY 4.0. Code: MIT.
